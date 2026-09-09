@@ -56,6 +56,21 @@ app.use(express.urlencoded({ extended: true }));
 // Static uploads folder for photo attachments
 app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
+// Serve frontend static build if present
+const frontendDistPath = path.join(__dirname, '../../frontend/dist');
+const frontendDistPathAlt = path.join(__dirname, '../frontend/dist');
+const fs = require('fs');
+let staticPath = '';
+if (fs.existsSync(frontendDistPath)) {
+  staticPath = frontendDistPath;
+} else if (fs.existsSync(frontendDistPathAlt)) {
+  staticPath = frontendDistPathAlt;
+}
+
+if (staticPath) {
+  app.use(express.static(staticPath));
+}
+
 // Mount API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/engineers', engineerRoutes);
@@ -76,6 +91,30 @@ app.get('/api/health', (_req, res) => {
     timestamp: new Date()
   });
 });
+
+// Root API / SPA endpoint (prevents "Cannot GET /" errors)
+app.get('/', (_req, res) => {
+  if (staticPath) {
+    res.sendFile(path.join(staticPath, 'index.html'));
+  } else {
+    res.json({
+      status: 'online',
+      system: 'Skyronet Field Tracking Backend API',
+      health: '/api/health',
+      frontend: 'https://skyronet-field-tracking-frontend.onrender.com'
+    });
+  }
+});
+
+// SPA fallback for non-API client routes
+if (staticPath) {
+  app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api') || req.path.startsWith('/uploads')) {
+      return next();
+    }
+    res.sendFile(path.join(staticPath, 'index.html'));
+  });
+}
 
 app.use(errorHandler);
 
