@@ -1,16 +1,25 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 70" fill="none">
-  <!-- Wifi Emblem Container with White Wifi Icon -->
-  <g transform="translate(5, 5)">
-    <rect width="60" height="60" rx="16" fill="#2563eb" />
-    <!-- White Top Signal Waves -->
-    <path d="M 17 25 A 18 18 0 0 1 43 25" stroke="#ffffff" stroke-width="4" stroke-linecap="round" fill="none" />
-    <path d="M 23 32 A 11 11 0 0 1 37 32" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" fill="none" />
-    <circle cx="30" cy="38" r="3" fill="#ffffff" />
-    <!-- White Bottom Target Arcs -->
-    <path d="M 20 44 A 14 14 0 0 0 40 44" stroke="#ffffff" stroke-width="3.5" stroke-linecap="round" fill="none" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 140" fill="none">
+  <!-- Skyronet Radar Icon (Image 2) -->
+  <g transform="translate(10, 8) scale(0.7)">
+    <!-- Top Red Radar Waves -->
+    <path d="M 43 50 A 72 72 0 0 1 157 50" stroke="#ED2224" stroke-width="16" stroke-linecap="round" fill="none" />
+    <path d="M 62 70 A 48 48 0 0 1 138 70" stroke="#ED2224" stroke-width="14" stroke-linecap="round" fill="none" />
+
+    <!-- Center Red Inverted Pointer -->
+    <polygon points="100,116 80,78 120,78" fill="#ED2224" />
+
+    <!-- Black Outer Side & Bottom Framing Arcs -->
+    <path d="M 43 64 A 72 72 0 0 0 92 172" stroke="#262626" stroke-width="16" stroke-linecap="round" fill="none" />
+    <path d="M 157 64 A 72 72 0 0 1 108 172" stroke="#262626" stroke-width="16" stroke-linecap="round" fill="none" />
+
+    <!-- Black Inner Side & Bottom Framing Arcs -->
+    <path d="M 62 84 A 48 48 0 0 0 94 148" stroke="#262626" stroke-width="14" stroke-linecap="round" fill="none" />
+    <path d="M 138 84 A 48 48 0 0 1 106 148" stroke="#262626" stroke-width="14" stroke-linecap="round" fill="none" />
   </g>
 
-  <!-- SKYRONET TECHNOLOGY in Solid BLACK Text -->
-  <text x="80" y="38" font-family="'Inter', system-ui, -apple-system, sans-serif" font-weight="900" font-size="23" fill="#000000" letter-spacing="1.5">SKYRONET</text>
-  <text x="80" y="56" font-family="'Inter', system-ui, -apple-system, sans-serif" font-weight="800" font-size="12" fill="#000000" letter-spacing="3.5">TECHNOLOGY</text>
+  <!-- Typography Group: SKYRONET TECHNOLOGY -->
+  <g fill="#262626">
+    <text x="150" y="72" font-family="'Orbitron', 'Rajdhani', 'Eurostile', 'Titillium Web', system-ui, -apple-system, sans-serif" font-weight="900" font-size="46" letter-spacing="2">SKYRONET</text>
+    <text x="152" y="98" font-family="'Orbitron', 'Rajdhani', 'Eurostile', 'Titillium Web', system-ui, -apple-system, sans-serif" font-weight="800" font-size="18" letter-spacing="5.5">TECHNOLOGY</text>
+  </g>
 </svg>
