@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
@@ -241,6 +241,25 @@ export const AppContent: React.FC = () => {
 };
 
 import { ThemeProvider } from './context/ThemeContext';
+import { useServiceWorker } from './hooks/useServiceWorker';
+import { UpdatePrompt } from './components/UpdatePrompt';
+
+function AppWithUpdatePrompt() {
+  const { updateAvailable, applyUpdate } = useServiceWorker();
+  const [dismissed, setDismissed] = useState(false);
+
+  return (
+    <>
+      <AppContent />
+      {updateAvailable && !dismissed && (
+        <UpdatePrompt
+          onUpdate={applyUpdate}
+          onDismiss={() => setDismissed(true)}
+        />
+      )}
+    </>
+  );
+}
 
 export function App() {
   return (
@@ -249,7 +268,7 @@ export function App() {
         <AuthProvider>
           <SocketProvider>
             <GoogleMapsProvider>
-              <AppContent />
+              <AppWithUpdatePrompt />
             </GoogleMapsProvider>
           </SocketProvider>
         </AuthProvider>
