@@ -7,6 +7,7 @@ import { AuditLog } from '../models/AuditLog';
 import { AuthRequest } from '../middleware/auth';
 import { getIO } from '../socket';
 import { getInMemoryStore, saveStoreToDisk } from '../utils/inMemoryDB';
+import { createNotification } from '../utils/notificationHelper';
 
 export async function getTasks(req: AuthRequest, res: Response) {
   try {
@@ -319,10 +320,12 @@ export async function updateTaskStatus(req: AuthRequest, res: Response) {
       }
       task.updatedAt = new Date();
 
+      let engName = 'Field Engineer';
       if (task.assignedEngineer) {
         const engId = typeof task.assignedEngineer === 'object' ? task.assignedEngineer._id : task.assignedEngineer;
         const engineer = store.engineers.find((e) => e._id === engId);
         if (engineer) {
+          engName = `${engineer.firstName} ${engineer.lastName}`;
           if (status === 'On The Way') engineer.status = 'On The Way';
           else if (status === 'In Progress') engineer.status = 'On Task';
           else if (status === 'Completed') {
@@ -332,8 +335,27 @@ export async function updateTaskStatus(req: AuthRequest, res: Response) {
         }
       }
 
+      saveStoreToDisk();
+
       try {
         getIO().emit('task:status-updated', { taskId: task._id, status });
+        if (status === 'In Progress' || status === 'On The Way') {
+          await createNotification({
+            roles: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'],
+            title: 'Task Started',
+            message: `Task ${task.taskId} started by ${engName}`,
+            type: 'INFO',
+            link: '/tasks'
+          });
+        } else if (status === 'Completed') {
+          await createNotification({
+            roles: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'],
+            title: 'Task Completed',
+            message: `Task ${task.taskId} completed by ${engName}`,
+            type: 'SUCCESS',
+            link: '/tasks'
+          });
+        }
       } catch (_) {}
 
       return res.json({ success: true, message: `Task status updated to ${status}`, data: task });
@@ -355,9 +377,11 @@ export async function updateTaskStatus(req: AuthRequest, res: Response) {
     await task.save();
 
     // Update engineer status if relevant
+    let engName = 'Field Engineer';
     if (task.assignedEngineer) {
       const engineer = await Engineer.findById(task.assignedEngineer);
       if (engineer) {
+        engName = `${engineer.firstName} ${engineer.lastName}`;
         if (status === 'On The Way') engineer.status = 'On The Way';
         else if (status === 'In Progress') engineer.status = 'On Task';
         else if (status === 'Completed') {
@@ -370,6 +394,23 @@ export async function updateTaskStatus(req: AuthRequest, res: Response) {
 
     try {
       getIO().emit('task:status-updated', { taskId: task._id, status });
+      if (status === 'In Progress' || status === 'On The Way') {
+        await createNotification({
+          roles: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'],
+          title: 'Task Started',
+          message: `Task ${task.taskId} started by ${engName}`,
+          type: 'INFO',
+          link: '/tasks'
+        });
+      } else if (status === 'Completed') {
+        await createNotification({
+          roles: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'],
+          title: 'Task Completed',
+          message: `Task ${task.taskId} completed by ${engName}`,
+          type: 'SUCCESS',
+          link: '/tasks'
+        });
+      }
     } catch (_) {}
 
     return res.json({ success: true, message: `Task status updated to ${status}`, data: task });

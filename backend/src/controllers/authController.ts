@@ -7,6 +7,7 @@ import { generateToken } from '../utils/jwt';
 import { AuthRequest } from '../middleware/auth';
 import { getInMemoryStore, saveStoreToDisk } from '../utils/inMemoryDB';
 import { getIO } from '../socket';
+import { createNotification } from '../utils/notificationHelper';
 
 export async function login(req: Request, res: Response) {
   try {
@@ -290,6 +291,13 @@ export async function registerEngineer(req: Request, res: Response) {
 
     try {
       getIO().emit('engineer:location-update', { type: 'engineer:created', engineer: engObj });
+      await createNotification({
+        roles: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'],
+        title: 'New Engineer Registered',
+        message: `${fullName} created account (${engIdStr})`,
+        type: 'INFO',
+        link: '/engineers'
+      });
     } catch (_) {}
 
     const token = generateToken({

@@ -11,6 +11,7 @@ import { AuditLog } from '../models/AuditLog';
 import { Notification } from '../models/Notification';
 import { User } from '../models/User';
 import { getInMemoryStore, saveStoreToDisk } from '../utils/inMemoryDB';
+import { createNotification } from '../utils/notificationHelper';
 
 export function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
@@ -140,16 +141,13 @@ export async function startTrip(req: AuthRequest, res: Response) {
 
       // Create Admin & Accounts Alert Notifications
       try {
-        const admins = await User.find({ role: { $in: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'] } });
-        for (const admin of admins) {
-          await Notification.create({
-            userId: admin._id,
-            title: 'Field Ride Started',
-            message: `Engineer ${engineer.firstName} ${engineer.lastName} (${engineer.engineerId}) started GPS ride ${trip.tripId} ${task ? `for task ${task.taskId}` : ''}`,
-            type: 'INFO',
-            link: '/live-tracking'
-          });
-        }
+        await createNotification({
+          roles: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'],
+          title: 'Ride Started',
+          message: `${engineer.firstName} ${engineer.lastName} started ride ${trip.tripId}`,
+          type: 'INFO',
+          link: '/live-tracking'
+        });
       } catch (_) {}
 
       try {
@@ -255,6 +253,13 @@ export async function startTrip(req: AuthRequest, res: Response) {
           engineer,
           activeTrip: newTrip
         });
+        await createNotification({
+          roles: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'],
+          title: 'Ride Started',
+          message: `${engineer.firstName} ${engineer.lastName} started ride ${newTrip.tripId}`,
+          type: 'INFO',
+          link: '/live-tracking'
+        });
       } catch (_) {}
 
       return res.status(201).json({
@@ -348,16 +353,14 @@ export async function stopTrip(req: AuthRequest, res: Response) {
 
       // Create Admin & Accounts Alert Notifications
       try {
-        const admins = await User.find({ role: { $in: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'] } });
-        for (const admin of admins) {
-          await Notification.create({
-            userId: admin._id,
-            title: 'Field Ride Completed',
-            message: `Engineer ${engineer ? engineer.firstName : 'Field Engineer'} completed ride ${trip.tripId} (${trip.distanceKm} KM, ₹${trip.totalAmount}). Submitted to Accounts.`,
-            type: 'SUCCESS',
-            link: '/expenses'
-          });
-        }
+        const engName = engineer ? `${engineer.firstName} ${engineer.lastName}` : 'Field Engineer';
+        await createNotification({
+          roles: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'],
+          title: 'Ride Stopped',
+          message: `${engName} stopped ride ${trip.tripId} (${trip.distanceKm} km)`,
+          type: 'SUCCESS',
+          link: '/expenses'
+        });
       } catch (_) {}
 
       return res.json({
@@ -432,6 +435,14 @@ export async function stopTrip(req: AuthRequest, res: Response) {
           expense
         });
         getIO().emit('expense:created', { expense });
+        const engName = engineer ? `${engineer.firstName} ${engineer.lastName}` : 'Field Engineer';
+        await createNotification({
+          roles: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'],
+          title: 'Ride Stopped',
+          message: `${engName} stopped ride ${trip.tripId} (${trip.distanceKm} km)`,
+          type: 'SUCCESS',
+          link: '/expenses'
+        });
       } catch (_) {}
 
       return res.json({

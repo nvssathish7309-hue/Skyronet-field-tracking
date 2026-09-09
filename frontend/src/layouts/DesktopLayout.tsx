@@ -26,9 +26,12 @@ import {
 import { BrandLogo } from '../components/BrandLogo';
 import { useTheme } from '../context/ThemeContext';
 
+import { useSocket } from '../context/SocketContext';
+
 export const DesktopLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { socket } = useSocket();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -38,29 +41,50 @@ export const DesktopLayout: React.FC<{ children: React.ReactNode }> = ({ childre
   const [bellShaking, setBellShaking] = useState(false);
   const prevUnreadRef = React.useRef<number>(0);
 
-  useEffect(() => {
-    const fetchUnreadCount = async () => {
-      try {
-        const res = await api.get('/notifications');
-        if (res.data.success && Array.isArray(res.data.data)) {
-          const count = res.data.data.filter((n: any) => !n.isRead).length;
-          // Shake bell only when new notifications arrive
-          if (count > prevUnreadRef.current) {
-            setBellShaking(true);
-            setTimeout(() => setBellShaking(false), 800);
-          }
-          prevUnreadRef.current = count;
-          setUnreadCount(count);
+  const fetchUnreadCount = async () => {
+    try {
+      const res = await api.get('/notifications');
+      if (res.data.success && Array.isArray(res.data.data)) {
+        const count = res.data.data.filter((n: any) => !n.isRead).length;
+        // Shake bell only when new notifications arrive
+        if (count > prevUnreadRef.current) {
+          setBellShaking(true);
+          setTimeout(() => setBellShaking(false), 800);
         }
-      } catch (err) {
-        setUnreadCount(0);
+        prevUnreadRef.current = count;
+        setUnreadCount(count);
       }
-    };
+    } catch (err) {
+      setUnreadCount(0);
+    }
+  };
 
+  useEffect(() => {
     fetchUnreadCount();
     const interval = setInterval(fetchUnreadCount, 15000);
     return () => clearInterval(interval);
   }, [location.pathname]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const handleNewNotif = () => {
+      fetchUnreadCount();
+    };
+
+    socket.on('notification:new', handleNewNotif);
+    socket.on('trip:started', handleNewNotif);
+    socket.on('trip:completed', handleNewNotif);
+    socket.on('task:status-updated', handleNewNotif);
+    socket.on('engineer:location-update', handleNewNotif);
+
+    return () => {
+      socket.off('notification:new', handleNewNotif);
+      socket.off('trip:started', handleNewNotif);
+      socket.off('trip:completed', handleNewNotif);
+      socket.off('task:status-updated', handleNewNotif);
+      socket.off('engineer:location-update', handleNewNotif);
+    };
+  }, [socket]);
 
   const mainNavItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['SUPER_ADMIN', 'ADMIN'] },
