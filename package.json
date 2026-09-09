@@ -1,0 +1,29 @@
+{
+  "name": "fieldtrack-360",
+  "version": "1.0.0",
+  "description": "FieldTrack 360 — Real-Time Field Engineer & Travel Management System",
+  "scripts": {
+    "setup": "npm run setup:backend && npm run setup:frontend",
+    "setup:backend": "cd backend && npm install",
+    "setup:frontend": "cd frontend && npm install",
+    "dev": "concurrently -k -p \"[{name}]\" -n \"backend,frontend\" -c \"blue,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:all": "concurrently -k -p \"[{name}]\" -n \"backend,frontend\" -c \"blue,green\" \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:frontend": "cd frontend && npm run dev",
+    "build": "cd backend && npm run build && cd ../frontend && npm run build",
+    "seed": "cd backend && npm run seed"
+  },
+  "keywords": [
+    "fieldtrack",
+    "gps-tracking",
+    "telecom",
+    "reimbursement",
+    "socket.io",
+    "google-maps"
+  ],
+  "author": "Skyronet Networks",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^10.0.5"
+  }
+}

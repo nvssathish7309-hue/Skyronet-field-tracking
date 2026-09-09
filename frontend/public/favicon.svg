@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <!-- Red Top Radar Arcs -->
+  <!-- Outer Red Arc -->
+  <path d="M 32 80 A 80 80 0 0 1 168 80" stroke="#E52330" stroke-width="16" stroke-linecap="round" fill="none" />
+  <!-- Inner Red Arc -->
+  <path d="M 58 92 A 50 50 0 0 1 142 92" stroke="#E52330" stroke-width="14" stroke-linecap="round" fill="none" />
+  <!-- Center Red Inverted Wedge / Dot -->
+  <polygon points="100,122 86,98 114,98" fill="#E52330" />
+  <circle cx="100" cy="102" r="7" fill="#E52330" />
+
+  <!-- Dark Charcoal Bottom Radar Arcs -->
+  <!-- Inner Dark Arc -->
+  <path d="M 62 118 A 50 50 0 0 0 138 118" stroke="#262626" stroke-width="14" stroke-linecap="round" fill="none" />
+  <!-- Outer Dark Arc -->
+  <path d="M 32 126 A 80 80 0 0 0 168 126" stroke="#262626" stroke-width="16" stroke-linecap="round" fill="none" />
+  <!-- Left Side Cap Arc -->
+  <path d="M 23 90 A 80 80 0 0 0 23 115" stroke="#262626" stroke-width="16" stroke-linecap="round" fill="none" />
+  <!-- Right Side Cap Arc -->
+  <path d="M 177 90 A 80 80 0 0 0 177 115" stroke="#262626" stroke-width="16" stroke-linecap="round" fill="none" />
+</svg>

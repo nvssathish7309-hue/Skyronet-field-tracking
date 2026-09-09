@@ -1,0 +1,21 @@
+import { Router } from 'express';
+import {
+  getEngineers,
+  getEngineerById,
+  createEngineer,
+  updateEngineer,
+  updateMyProfile
+} from '../controllers/engineerController';
+import { protect, authorize } from '../middleware/auth';
+
+const router = Router();
+
+router.use(protect);
+
+router.put('/profile', updateMyProfile);
+router.get('/', getEngineers);
+router.get('/:id', getEngineerById);
+router.post('/', authorize('SUPER_ADMIN', 'ADMIN'), createEngineer);
+router.put('/:id', authorize('SUPER_ADMIN', 'ADMIN'), updateEngineer);
+
+export default router;
