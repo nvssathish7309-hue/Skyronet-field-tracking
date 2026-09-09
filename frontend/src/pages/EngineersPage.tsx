@@ -476,7 +476,7 @@ export const EngineersPage: React.FC = () => {
                     value={addFirstName}
                     onChange={(e) => setAddFirstName(e.target.value)}
                     required
-                    placeholder="Sathish"
+                    placeholder="Field"
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                   />
                 </div>
@@ -486,7 +486,7 @@ export const EngineersPage: React.FC = () => {
                     type="text"
                     value={addLastName}
                     onChange={(e) => setAddLastName(e.target.value)}
-                    placeholder="N"
+                    placeholder="Engineer"
                     className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                   />
                 </div>

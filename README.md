@@ -102,7 +102,7 @@ The database automatically populates with pre-seeded demo accounts upon first st
 ## 🔄 End-to-End Workflow Demonstration
 
 1. **Admin Login**: Sign in as `admin@fieldtrack.com`.
-2. **Create Task**: Go to `Field Tasks` -> `Assign New Task`. Select location coordinates and assign to **Sathish N (FE-0001)**.
+2. **Create Task**: Go to `Field Tasks` -> `Assign New Task`. Select location coordinates and assign to **Field Engineer (FE-0001)**.
 3. **Engineer Mobile Login**: Open a second window/tab or mobile device and sign in as `engineer1@fieldtrack.com`.
 4. **Start Trip**: Open the assigned task and click `[ START TRIP & BEGIN GPS TRACKING ]`.
 5. **Real-time Map**: On the Admin dashboard, navigate to `Live Tracking` (`/live-tracking`) to watch the engineer's marker update live on the map.

@@ -36,9 +36,9 @@ export const EngineerProfilePage: React.FC = () => {
 
   const [profileForm, setProfileForm] = useState({
     engineerId: eng?.engineerId || 'FE-7327',
-    firstName: eng?.firstName || user?.name?.split(' ')[0] || 'SATHISH',
-    lastName: eng?.lastName || user?.name?.split(' ').slice(1).join(' ') || 'NARAYANAPPA',
-    phone: eng?.phone || user?.phone || '+916380887476',
+    firstName: eng?.firstName || user?.name?.split(' ')[0] || 'Field',
+    lastName: eng?.lastName || user?.name?.split(' ').slice(1).join(' ') || 'Engineer',
+    phone: eng?.phone || user?.phone || '+919876511111',
     designation: eng?.designation || 'Network Field Engineer',
     department: eng?.department || 'Field Operations',
     bikeNumber: eng?.assignedBike ? eng.assignedBike.bikeNumber : 'TN 38 AB 1234',
@@ -58,9 +58,9 @@ export const EngineerProfilePage: React.FC = () => {
   const openEditModal = () => {
     setProfileForm({
       engineerId: eng?.engineerId || 'FE-7327',
-      firstName: eng?.firstName || user?.name?.split(' ')[0] || 'SATHISH',
-      lastName: eng?.lastName || user?.name?.split(' ').slice(1).join(' ') || 'NARAYANAPPA',
-      phone: eng?.phone || user?.phone || '+916380887476',
+      firstName: eng?.firstName || user?.name?.split(' ')[0] || 'Field',
+      lastName: eng?.lastName || user?.name?.split(' ').slice(1).join(' ') || 'Engineer',
+      phone: eng?.phone || user?.phone || '+919876511111',
       designation: eng?.designation || 'Network Field Engineer',
       department: eng?.department || 'Field Operations',
       bikeNumber: eng?.assignedBike ? eng.assignedBike.bikeNumber : 'TN 38 AB 1234',

@@ -68,8 +68,8 @@ export async function seedDatabase() {
     // 2. Create Field Engineers & Users
     const engineersData = [
       {
-        firstName: 'Sathish',
-        lastName: 'N',
+        firstName: 'Field',
+        lastName: 'Engineer',
         email: 'engineer1@fieldtrack.com',
         phone: '+91 98765 11111',
         empId: 'EMP-1001',
