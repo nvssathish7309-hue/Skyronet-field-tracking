@@ -77,7 +77,7 @@ export const EngineerSignupPage: React.FC = () => {
       <div className="max-w-lg w-full relative z-10">
         {/* Brand Header */}
         <div className="text-center mb-6">
-          <div className="inline-block bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-200/80 mb-3">
+          <div className="inline-flex items-center justify-center bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-200/80 mb-3">
             <BrandLogo size="lg" />
           </div>
           <h1 className="text-xl font-black text-slate-900 tracking-tight mt-1">Field Engineer Registration</h1>

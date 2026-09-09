@@ -55,7 +55,7 @@ export const LoginPage: React.FC = () => {
       <div className="max-w-md w-full relative z-10">
         {/* Brand Container Header */}
         <div className="text-center mb-8">
-          <div className="inline-block bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-200/80">
+          <div className="inline-flex items-center justify-center bg-white px-6 py-4 rounded-2xl shadow-sm border border-slate-200/80">
             <BrandLogo size="lg" />
           </div>
         </div>
