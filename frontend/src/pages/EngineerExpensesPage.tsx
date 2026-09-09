@@ -69,13 +69,17 @@ export const EngineerExpensesPage: React.FC = () => {
     }
   };
 
-  const totalApproved = expenses
-    .filter((e) => e.status === 'Approved')
-    .reduce((sum, e) => sum + (e.calculatedAmount || 0), 0);
+  const totalApproved = Math.round(
+    expenses
+      .filter((e) => e.status === 'Approved')
+      .reduce((sum, e) => sum + (e.calculatedAmount || e.submittedAmount || 0), 0) * 100
+  ) / 100;
 
-  const totalPending = expenses
-    .filter((e) => e.status === 'Pending')
-    .reduce((sum, e) => sum + (e.calculatedAmount || 0), 0);
+  const totalPending = Math.round(
+    expenses
+      .filter((e) => e.status === 'Pending')
+      .reduce((sum, e) => sum + (e.calculatedAmount || e.submittedAmount || 0), 0) * 100
+  ) / 100;
 
   return (
     <div className="space-y-4 max-w-md mx-auto font-sans">
@@ -164,7 +168,9 @@ export const EngineerExpensesPage: React.FC = () => {
 
                 <div className="flex items-center justify-between text-xs">
                   <span className="text-slate-500 font-medium">Claim Amount:</span>
-                  <span className="font-mono font-black text-blue-700 text-sm">₹{e.calculatedAmount}</span>
+                  <span className="font-mono font-black text-blue-700 text-sm">
+                    ₹{Math.round((e.calculatedAmount || e.submittedAmount || 0) * 100) / 100}
+                  </span>
                 </div>
 
                 {e.status === 'Rejected' && e.rejectionReason && (

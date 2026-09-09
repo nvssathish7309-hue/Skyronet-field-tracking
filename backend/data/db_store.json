@@ -38,7 +38,8 @@
       "phone": "+916380887476",
       "role": "FIELD_ENGINEER",
       "isOnline": true,
-      "createdAt": "2026-09-09T10:18:42.996Z"
+      "createdAt": "2026-09-09T10:18:42.996Z",
+      "lastActive": "2026-09-09T11:19:06.569Z"
     }
   ],
   "engineers": [
@@ -54,7 +55,10 @@
       "department": "Field Operations",
       "designation": "Network Field Engineer",
       "joiningDate": "2026-09-09T10:18:42.997Z",
-      "status": "Available"
+      "status": "Available",
+      "currentLatitude": 11.2721,
+      "currentLongitude": 77.6784,
+      "lastLocationUpdate": "2026-09-09T11:19:06.569Z"
     }
   ],
   "bikes": [],
