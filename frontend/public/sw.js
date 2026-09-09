@@ -2,30 +2,42 @@
  * Skyronet Field Tracking — Service Worker
  * Handles PWA caching and triggers an update notification
  * when a new version of the app is deployed.
+ *
+ * CACHE_VERSION is updated on every new deploy so the browser
+ * always detects this file as changed and installs the new SW.
  */
 
-const CACHE_NAME = 'skyronet-v' + self.registration.scope;
+const CACHE_VERSION = 'skyronet-v3';
+const CACHE_NAME = CACHE_VERSION;
 
-// On install — cache the app shell
+// On install — skip waiting immediately so this SW moves to "waiting" state
+// The app will show a prompt; on user confirmation it calls SKIP_WAITING.
 self.addEventListener('install', (event) => {
-  // Skip waiting so the new SW activates immediately on next reload
-  // but we intentionally do NOT call skipWaiting() here so the
-  // user sees the "Update Available" prompt first.
-  console.log('[SW] Installing new version...');
+  console.log('[SW] Installing:', CACHE_NAME);
+  // Do NOT call skipWaiting() here — let the app's UpdatePrompt control it.
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      // Pre-cache the app shell
+      return cache.addAll(['/']);
+    }).catch(() => { /* ignore pre-cache errors */ })
+  );
 });
 
-// On activate — clean up old caches
+// On activate — clean up ALL old caches
 self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating:', CACHE_NAME);
   event.waitUntil(
     caches.keys().then((keys) =>
       Promise.all(
         keys
           .filter((key) => key !== CACHE_NAME)
-          .map((key) => caches.delete(key))
+          .map((key) => {
+            console.log('[SW] Deleting old cache:', key);
+            return caches.delete(key);
+          })
       )
-    )
+    ).then(() => self.clients.claim())
   );
-  console.log('[SW] Activated.');
 });
 
 // Fetch — network first, fall back to cache
@@ -41,7 +53,10 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        // Clone and cache the fresh response
+        // Only cache valid responses
+        if (!response || response.status !== 200 || response.type !== 'basic') {
+          return response;
+        }
         const clone = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
         return response;
@@ -53,9 +68,10 @@ self.addEventListener('fetch', (event) => {
   );
 });
 
-// Listen for message from the app to skip waiting and reload
+// Listen for message from the app to skip waiting and activate new SW
 self.addEventListener('message', (event) => {
   if (event.data === 'SKIP_WAITING') {
+    console.log('[SW] Skipping waiting — activating new version.');
     self.skipWaiting();
   }
 });
