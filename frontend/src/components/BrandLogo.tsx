@@ -17,9 +17,9 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     return (
       <div className={`flex items-center justify-center select-none ${className}`}>
         <img
-          src="/logo.png"
+          src="/logo-icon.png"
           alt="SKYRONET TECHNOLOGY"
-          className={`${iconDimensions} object-cover object-left transition-transform duration-200 hover:scale-105`}
+          className={`${iconDimensions} object-contain transition-transform duration-200 hover:scale-105`}
         />
       </div>
     );
