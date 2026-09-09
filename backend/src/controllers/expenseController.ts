@@ -7,30 +7,69 @@ import { AuditLog } from '../models/AuditLog';
 import { AuthRequest } from '../middleware/auth';
 import { getIO } from '../socket';
 
+import mongoose from 'mongoose';
+import { getInMemoryStore } from '../utils/inMemoryDB';
+
 export async function getExpenses(req: AuthRequest, res: Response) {
   try {
     const { status, engineerId, search } = req.query;
 
-    const query: any = {};
-    if (status) query.status = status;
-    if (engineerId) query.engineerId = engineerId;
+    if (mongoose.connection.readyState === 1) {
+      const query: any = {};
+      if (status) query.status = status;
+      if (engineerId) query.engineerId = engineerId;
 
-    if (req.user?.role === 'FIELD_ENGINEER') {
-      const engineer = await Engineer.findOne({ userId: req.user.userId });
-      if (engineer) query.engineerId = engineer._id;
+      if (req.user?.role === 'FIELD_ENGINEER') {
+        const engineer = await Engineer.findOne({
+          $or: [{ userId: req.user.userId }, { email: req.user.email }]
+        });
+        if (engineer) query.engineerId = engineer._id;
+      }
+
+      const expenses = await Expense.find(query)
+        .populate({
+          path: 'engineerId',
+          populate: { path: 'assignedBike' }
+        })
+        .populate('taskId')
+        .populate('tripId')
+        .populate('reviewedBy', 'name email')
+        .sort({ createdAt: -1 });
+
+      return res.json({ success: true, count: expenses.length, data: expenses });
+    } else {
+      const store = getInMemoryStore();
+      let result = [...store.expenses];
+
+      if (req.user?.role === 'FIELD_ENGINEER') {
+        const engineer = store.engineers.find(
+          (e) => e.userId === req.user!.userId || e.email === req.user!.email
+        );
+        if (engineer) {
+          result = result.filter(
+            (e) => e.engineerId === engineer._id || (e.engineerId as any)?._id === engineer._id
+          );
+        }
+      }
+
+      if (status) {
+        result = result.filter((e) => e.status === status);
+      }
+
+      const populated = result.map((exp) => {
+        const engObj = typeof exp.engineerId === 'object' ? exp.engineerId : store.engineers.find((e) => e._id === exp.engineerId);
+        const taskObj = typeof exp.taskId === 'object' ? exp.taskId : store.tasks.find((t) => t._id === exp.taskId);
+        const tripObj = typeof exp.tripId === 'object' ? exp.tripId : store.trips.find((tr) => tr._id === exp.tripId);
+        return {
+          ...exp,
+          engineerId: engObj || exp.engineerId,
+          taskId: taskObj || exp.taskId,
+          tripId: tripObj || exp.tripId
+        };
+      });
+
+      return res.json({ success: true, count: populated.length, data: populated });
     }
-
-    const expenses = await Expense.find(query)
-      .populate({
-        path: 'engineerId',
-        populate: { path: 'assignedBike' }
-      })
-      .populate('taskId')
-      .populate('tripId')
-      .populate('reviewedBy', 'name email')
-      .sort({ createdAt: -1 });
-
-    return res.json({ success: true, count: expenses.length, data: expenses });
   } catch (error: any) {
     return res.status(500).json({ success: false, message: error.message });
   }
