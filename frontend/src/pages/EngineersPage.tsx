@@ -166,7 +166,16 @@ export const EngineersPage: React.FC = () => {
     }
   };
 
-  const filtered = engineers.filter(
+  const uniqueEngineersMap = new Map<string, Engineer>();
+  for (const eng of engineers) {
+    const key = (eng.email || eng.engineerId || `${eng.firstName}_${eng.lastName}`).toLowerCase().trim();
+    if (!uniqueEngineersMap.has(key)) {
+      uniqueEngineersMap.set(key, eng);
+    }
+  }
+  const uniqueEngineers = Array.from(uniqueEngineersMap.values());
+
+  const filtered = uniqueEngineers.filter(
     (e) =>
       e.firstName.toLowerCase().includes(search.toLowerCase()) ||
       e.lastName.toLowerCase().includes(search.toLowerCase()) ||

@@ -232,46 +232,118 @@ export async function createEngineer(req: AuthRequest, res: Response) {
   try {
     const { firstName, lastName, email, phone, password, employeeId, department, designation } = req.body;
 
-    if (!firstName || !lastName || !email || !phone || !password || !employeeId) {
-      return res.status(400).json({ success: false, message: 'Please provide all required fields' });
+    if (!firstName || !email || !phone || !password) {
+      return res.status(400).json({ success: false, message: 'Please provide all required fields: First Name, Email, Phone, Password' });
     }
 
-    const existingUser = await User.findOne({ email: email.toLowerCase() });
-    if (existingUser) {
-      return res.status(400).json({ success: false, message: 'Email already exists' });
+    const cleanEmail = email.toLowerCase().trim();
+    const fullName = `${firstName} ${lastName || ''}`.trim();
+    const cleanPhone = phone.trim();
+
+    if (mongoose.connection.readyState === 1) {
+      const existingUser = await User.findOne({
+        $or: [{ email: cleanEmail }, { phone: cleanPhone }]
+      });
+      if (existingUser) {
+        return res.status(400).json({ success: false, message: 'An account with this email address or phone number already exists' });
+      }
+
+      const existingEng = await Engineer.findOne({
+        $or: [{ email: cleanEmail }, { phone: cleanPhone }]
+      });
+      if (existingEng) {
+        return res.status(400).json({ success: false, message: 'An engineer with this email address or phone number already exists' });
+      }
+
+      const hashedPassword = await hashPassword(password);
+
+      const user = await User.create({
+        email: cleanEmail,
+        password: hashedPassword,
+        name: fullName,
+        phone: cleanPhone,
+        role: 'FIELD_ENGINEER',
+        isOnline: true
+      });
+
+      const count = await Engineer.countDocuments();
+      const empIdStr = employeeId || `EMP-${String(count + 1).padStart(4, '0')}`;
+      const engineerId = `FE-${String(count + 1).padStart(4, '0')}`;
+
+      const engineer = await Engineer.create({
+        engineerId,
+        userId: user._id,
+        firstName,
+        lastName: lastName || '',
+        email: cleanEmail,
+        phone: cleanPhone,
+        employeeId: empIdStr,
+        department: department || 'Field Operations',
+        designation: designation || 'Field Engineer',
+        status: 'Available',
+        joiningDate: new Date()
+      });
+
+      return res.status(201).json({
+        success: true,
+        message: 'Field Engineer created successfully',
+        data: engineer
+      });
+    } else {
+      const store = getInMemoryStore();
+      const existingUser = store.users.find(
+        (u) => (u.email && u.email.toLowerCase() === cleanEmail) || (u.phone && u.phone === cleanPhone)
+      );
+      if (existingUser) {
+        return res.status(400).json({ success: false, message: 'An account with this email address or phone number already exists' });
+      }
+
+      const existingEng = store.engineers.find(
+        (e) => (e.email && e.email.toLowerCase() === cleanEmail) || (e.phone && e.phone === cleanPhone)
+      );
+      if (existingEng) {
+        return res.status(400).json({ success: false, message: 'An engineer with this email address or phone number already exists' });
+      }
+
+      const hashedPassword = await hashPassword(password);
+      const userIdStr = `usr_eng_${Date.now()}`;
+      const empIdStr = employeeId || `EMP-${String(store.engineers.length + 1).padStart(4, '0')}`;
+      const engineerId = `FE-${String(store.engineers.length + 1).padStart(4, '0')}`;
+
+      const userObj = {
+        _id: userIdStr,
+        email: cleanEmail,
+        password: hashedPassword,
+        name: fullName,
+        phone: cleanPhone,
+        role: 'FIELD_ENGINEER',
+        isOnline: true,
+        createdAt: new Date()
+      };
+      store.users.push(userObj);
+
+      const engObj = {
+        _id: `eng_${Date.now()}`,
+        engineerId,
+        userId: userIdStr,
+        firstName,
+        lastName: lastName || '',
+        email: cleanEmail,
+        phone: cleanPhone,
+        employeeId: empIdStr,
+        department: department || 'Field Operations',
+        designation: designation || 'Field Engineer',
+        status: 'Available',
+        joiningDate: new Date()
+      };
+      store.engineers.push(engObj);
+
+      return res.status(201).json({
+        success: true,
+        message: 'Field Engineer created successfully',
+        data: engObj
+      });
     }
-
-    const hashedPassword = await hashPassword(password);
-
-    const user = await User.create({
-      email: email.toLowerCase(),
-      password: hashedPassword,
-      name: `${firstName} ${lastName}`,
-      phone,
-      role: 'FIELD_ENGINEER'
-    });
-
-    const count = await Engineer.countDocuments();
-    const engineerId = `FE-${String(count + 1).padStart(4, '0')}`;
-
-    const engineer = await Engineer.create({
-      engineerId,
-      userId: user._id,
-      firstName,
-      lastName,
-      email: email.toLowerCase(),
-      phone,
-      employeeId,
-      department: department || 'Field Operations',
-      designation: designation || 'Network Engineer',
-      status: 'Available'
-    });
-
-    return res.status(201).json({
-      success: true,
-      message: 'Field Engineer created successfully',
-      data: engineer
-    });
   } catch (error: any) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -282,34 +354,65 @@ export async function updateEngineer(req: AuthRequest, res: Response) {
     const { id } = req.params;
     const { firstName, lastName, engineerId, phone, department, designation, status, assignedBike } = req.body;
 
-    const engineer = await Engineer.findById(id);
-    if (!engineer) {
-      return res.status(404).json({ success: false, message: 'Engineer not found' });
-    }
+    if (mongoose.connection.readyState === 1) {
+      const engineer = await Engineer.findById(id);
+      if (!engineer) {
+        return res.status(404).json({ success: false, message: 'Engineer not found' });
+      }
 
-    if (firstName) engineer.firstName = firstName;
-    if (lastName) engineer.lastName = lastName;
-    if (engineerId) engineer.engineerId = engineerId;
-    if (phone) engineer.phone = phone;
-    if (department) engineer.department = department;
-    if (designation) engineer.designation = designation;
-    if (status) engineer.status = status;
-    if (assignedBike !== undefined) engineer.assignedBike = assignedBike;
+      if (firstName) engineer.firstName = firstName;
+      if (lastName) engineer.lastName = lastName;
+      if (engineerId) engineer.engineerId = engineerId;
+      if (phone) engineer.phone = phone;
+      if (department) engineer.department = department;
+      if (designation) engineer.designation = designation;
+      if (status) engineer.status = status;
+      if (assignedBike !== undefined) engineer.assignedBike = assignedBike;
 
-    await engineer.save();
+      await engineer.save();
 
-    if (engineer.userId) {
-      await User.findByIdAndUpdate(engineer.userId, {
-        name: `${engineer.firstName} ${engineer.lastName}`,
-        phone: engineer.phone
+      if (engineer.userId) {
+        await User.findByIdAndUpdate(engineer.userId, {
+          name: `${engineer.firstName} ${engineer.lastName}`.trim(),
+          phone: engineer.phone
+        });
+      }
+
+      return res.json({
+        success: true,
+        message: 'Engineer updated successfully',
+        data: engineer
+      });
+    } else {
+      const store = getInMemoryStore();
+      const engineer = store.engineers.find((e) => e._id === id || e.engineerId === id);
+      if (!engineer) {
+        return res.status(404).json({ success: false, message: 'Engineer not found' });
+      }
+
+      if (firstName) engineer.firstName = firstName;
+      if (lastName) engineer.lastName = lastName;
+      if (engineerId) engineer.engineerId = engineerId;
+      if (phone) engineer.phone = phone;
+      if (department) engineer.department = department;
+      if (designation) engineer.designation = designation;
+      if (status) engineer.status = status;
+      if (assignedBike !== undefined) engineer.assignedBike = assignedBike;
+
+      if (engineer.userId) {
+        const user = store.users.find((u) => u._id === engineer.userId);
+        if (user) {
+          user.name = `${engineer.firstName} ${engineer.lastName}`.trim();
+          user.phone = engineer.phone;
+        }
+      }
+
+      return res.json({
+        success: true,
+        message: 'Engineer updated successfully',
+        data: engineer
       });
     }
-
-    return res.json({
-      success: true,
-      message: 'Engineer updated successfully',
-      data: engineer
-    });
   } catch (error: any) {
     return res.status(500).json({ success: false, message: error.message });
   }
@@ -565,6 +668,9 @@ export async function deleteEngineer(req: AuthRequest, res: Response) {
       if (engineer.userId) {
         await User.findByIdAndDelete(engineer.userId);
       }
+      if (engineer.email) {
+        await User.deleteMany({ email: engineer.email.toLowerCase().trim() });
+      }
 
       await Engineer.findByIdAndDelete(id);
 
@@ -579,12 +685,10 @@ export async function deleteEngineer(req: AuthRequest, res: Response) {
       const eng = store.engineers[index];
       store.engineers.splice(index, 1);
 
-      if (eng.userId) {
-        const userIdx = store.users.findIndex((u) => u._id === eng.userId);
-        if (userIdx !== -1) {
-          store.users.splice(userIdx, 1);
-        }
-      }
+      // Remove associated user accounts by userId or email
+      store.users = store.users.filter(
+        (u) => u._id !== eng.userId && (!eng.email || !u.email || u.email.toLowerCase().trim() !== eng.email.toLowerCase().trim())
+      );
 
       return res.json({ success: true, message: 'Engineer deleted successfully' });
     }
