@@ -68,11 +68,17 @@ export const AdminDashboard: React.FC = () => {
     };
 
     socket.on('engineer:location-update', handleUpdate);
+    socket.on('location:update', handleUpdate);
     socket.on('task:status-updated', handleUpdate);
+    socket.on('trip:started', handleUpdate);
+    socket.on('trip:completed', handleUpdate);
 
     return () => {
       socket.off('engineer:location-update', handleUpdate);
+      socket.off('location:update', handleUpdate);
       socket.off('task:status-updated', handleUpdate);
+      socket.off('trip:started', handleUpdate);
+      socket.off('trip:completed', handleUpdate);
     };
   }, [socket]);
 

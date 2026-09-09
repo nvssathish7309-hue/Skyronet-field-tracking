@@ -29,9 +29,34 @@
       "role": "ACCOUNTS",
       "isOnline": true,
       "createdAt": "2026-09-09T10:08:39.184Z"
+    },
+    {
+      "_id": "usr_eng_1788949122996",
+      "email": "sathish123@gmail.com",
+      "password": "$2a$10$G9tdoNiO2hU203EMxjuOK.QEvTe9ILIELMUTmbKNAxlPIVFICZhli",
+      "name": "SATHISH NARAYANAPPA",
+      "phone": "+916380887476",
+      "role": "FIELD_ENGINEER",
+      "isOnline": true,
+      "createdAt": "2026-09-09T10:18:42.996Z"
     }
   ],
-  "engineers": [],
+  "engineers": [
+    {
+      "_id": "eng_1788949122997",
+      "engineerId": "FE-4529",
+      "userId": "usr_eng_1788949122996",
+      "firstName": "SATHISH",
+      "lastName": "NARAYANAPPA",
+      "email": "sathish123@gmail.com",
+      "phone": "+916380887476",
+      "employeeId": "EMP-5607",
+      "department": "Field Operations",
+      "designation": "Network Field Engineer",
+      "joiningDate": "2026-09-09T10:18:42.997Z",
+      "status": "Available"
+    }
+  ],
   "bikes": [],
   "tasks": [],
   "trips": [],

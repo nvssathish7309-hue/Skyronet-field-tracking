@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { Expense, Trip, SystemSettings } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
+import { useSocket } from '../context/SocketContext';
 import {
   Receipt,
   CheckCircle2,
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 
 export const ExpensesPage: React.FC = () => {
+  const { socket } = useSocket();
   const [expenses, setExpenses] = useState<Expense[]>([]);
   const [trips, setTrips] = useState<Trip[]>([]);
   const [activeTab, setActiveTab] = useState<'expenses' | 'trips'>('expenses');
@@ -44,6 +46,27 @@ export const ExpensesPage: React.FC = () => {
     fetchTrips();
     fetchSettings();
   }, [statusFilter]);
+
+  useEffect(() => {
+    if (!socket) return;
+
+    const handleRefetch = () => {
+      fetchExpenses();
+      fetchTrips();
+    };
+
+    socket.on('trip:started', handleRefetch);
+    socket.on('trip:location-update', handleRefetch);
+    socket.on('trip:completed', handleRefetch);
+    socket.on('expense:created', handleRefetch);
+
+    return () => {
+      socket.off('trip:started', handleRefetch);
+      socket.off('trip:location-update', handleRefetch);
+      socket.off('trip:completed', handleRefetch);
+      socket.off('expense:created', handleRefetch);
+    };
+  }, [socket]);
 
   const fetchSettings = async () => {
     try {

@@ -8,7 +8,9 @@ import { SystemSettings } from '../models/SystemSettings';
 import { AuthRequest } from '../middleware/auth';
 import { getIO } from '../socket';
 import { AuditLog } from '../models/AuditLog';
-import { getInMemoryStore } from '../utils/inMemoryDB';
+import { Notification } from '../models/Notification';
+import { User } from '../models/User';
+import { getInMemoryStore, saveStoreToDisk } from '../utils/inMemoryDB';
 
 export function calculateDistanceKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
   if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
@@ -116,14 +118,38 @@ export async function startTrip(req: AuthRequest, res: Response) {
       engineer.lastLocationUpdate = new Date();
       await engineer.save();
 
+      // Emit Socket events for Admin & Accounts live dashboards
       try {
         getIO().emit('trip:started', {
           tripId: trip._id,
           tripCode: trip.tripId,
           engineerId: engineer._id,
           taskId: task ? task._id : undefined,
-          trip
+          trip,
+          engineer
         });
+        getIO().emit('location:update', {
+          engineerId: engineer._id,
+          userId: req.user!.userId,
+          latitude: startLat,
+          longitude: startLng,
+          engineer,
+          activeTrip: trip
+        });
+      } catch (_) {}
+
+      // Create Admin & Accounts Alert Notifications
+      try {
+        const admins = await User.find({ role: { $in: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'] } });
+        for (const admin of admins) {
+          await Notification.create({
+            userId: admin._id,
+            title: 'Field Ride Started',
+            message: `Engineer ${engineer.firstName} ${engineer.lastName} (${engineer.engineerId}) started GPS ride ${trip.tripId} ${task ? `for task ${task.taskId}` : ''}`,
+            type: 'INFO',
+            link: '/live-tracking'
+          });
+        }
       } catch (_) {}
 
       try {
@@ -210,6 +236,27 @@ export async function startTrip(req: AuthRequest, res: Response) {
       engineer.currentLongitude = startLng;
       engineer.lastLocationUpdate = new Date();
 
+      saveStoreToDisk();
+
+      try {
+        getIO().emit('trip:started', {
+          tripId: newTrip._id,
+          tripCode: newTrip.tripId,
+          engineerId: engineer._id,
+          taskId: task ? task._id : undefined,
+          trip: newTrip,
+          engineer
+        });
+        getIO().emit('location:update', {
+          engineerId: engineer._id,
+          userId: req.user!.userId,
+          latitude: startLat,
+          longitude: startLng,
+          engineer,
+          activeTrip: newTrip
+        });
+      } catch (_) {}
+
       return res.status(201).json({
         success: true,
         message: 'Trip started successfully. Real-time GPS tracking active.',
@@ -292,8 +339,25 @@ export async function stopTrip(req: AuthRequest, res: Response) {
           tripId: trip._id,
           expenseId: expense._id,
           distanceKm: trip.distanceKm,
-          totalAmount: trip.totalAmount
+          totalAmount: trip.totalAmount,
+          trip,
+          expense
         });
+        getIO().emit('expense:created', { expense });
+      } catch (_) {}
+
+      // Create Admin & Accounts Alert Notifications
+      try {
+        const admins = await User.find({ role: { $in: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'] } });
+        for (const admin of admins) {
+          await Notification.create({
+            userId: admin._id,
+            title: 'Field Ride Completed',
+            message: `Engineer ${engineer ? engineer.firstName : 'Field Engineer'} completed ride ${trip.tripId} (${trip.distanceKm} KM, ₹${trip.totalAmount}). Submitted to Accounts.`,
+            type: 'SUCCESS',
+            link: '/expenses'
+          });
+        }
       } catch (_) {}
 
       return res.json({
@@ -356,6 +420,20 @@ export async function stopTrip(req: AuthRequest, res: Response) {
         }
       }
 
+      saveStoreToDisk();
+
+      try {
+        getIO().emit('trip:completed', {
+          tripId: trip._id,
+          expenseId: expense._id,
+          distanceKm: trip.distanceKm,
+          totalAmount: trip.totalAmount,
+          trip,
+          expense
+        });
+        getIO().emit('expense:created', { expense });
+      } catch (_) {}
+
       return res.json({
         success: true,
         message: 'Trip stopped. Expense submitted for accounts approval.',
@@ -366,6 +444,7 @@ export async function stopTrip(req: AuthRequest, res: Response) {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
+
 
 export async function getTrips(req: AuthRequest, res: Response) {
   try {

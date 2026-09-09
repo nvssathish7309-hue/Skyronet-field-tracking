@@ -47,7 +47,7 @@ export const LiveTrackingPage: React.FC = () => {
               currentLatitude: data.latitude,
               currentLongitude: data.longitude,
               lastLocationUpdate: data.lastUpdated || new Date().toISOString(),
-              status: data.status || e.status
+              status: data.engineer?.status || data.status || e.status
             };
           }
           return e;
@@ -55,12 +55,22 @@ export const LiveTrackingPage: React.FC = () => {
       );
     };
 
+    const handleTripChanged = () => {
+      fetchEngineers();
+    };
+
     socket.on('location:update', handleLocationUpdate);
     socket.on('engineer:location-update', handleLocationUpdate);
+    socket.on('trip:started', handleTripChanged);
+    socket.on('trip:location-update', handleLocationUpdate);
+    socket.on('trip:completed', handleTripChanged);
 
     return () => {
       socket.off('location:update', handleLocationUpdate);
       socket.off('engineer:location-update', handleLocationUpdate);
+      socket.off('trip:started', handleTripChanged);
+      socket.off('trip:location-update', handleLocationUpdate);
+      socket.off('trip:completed', handleTripChanged);
     };
   }, [socket]);
 

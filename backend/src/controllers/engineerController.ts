@@ -498,6 +498,7 @@ export async function updateLocation(req: AuthRequest, res: Response) {
         user.isOnline = true;
         user.lastActive = new Date();
       }
+      saveStoreToDisk();
     }
 
     // Broadcast live location & active trip update via Socket.IO
