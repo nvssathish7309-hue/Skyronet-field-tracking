@@ -27,7 +27,7 @@ export const SocketProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   useEffect(() => {
     if (!isAuthenticated || !user) return;
 
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || (import.meta.env.PROD ? 'https://skyronet-field-tracking-backend.onrender.com' : 'http://localhost:5000');
     const s = io(socketUrl, {
       transports: ['websocket', 'polling']
     });
