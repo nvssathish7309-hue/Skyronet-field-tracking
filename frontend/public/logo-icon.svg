@@ -1,14 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
-  <!-- Crisp white circular container badge so emblem is 100% visible on dark & light browser tabs -->
-  <circle cx="100" cy="100" r="96" fill="#FFFFFF" />
-  <circle cx="100" cy="100" r="95" stroke="#E2E8F0" stroke-width="2" fill="none" />
+  <!-- ChatGPT-style crisp white rounded square container badge -->
+  <rect x="4" y="4" width="192" height="192" rx="44" fill="#FFFFFF" />
+  <rect x="4" y="4" width="192" height="192" rx="44" stroke="#E2E8F0" stroke-width="2" fill="none" />
 
-  <!-- Top Red Signal Waves -->
+  <!-- Official Red Top Radar Waves -->
   <path d="M 40 85 A 65 65 0 0 1 160 85" stroke="#E52330" stroke-width="16" stroke-linecap="round" fill="none" />
   <path d="M 60 98 A 42 42 0 0 1 140 98" stroke="#E52330" stroke-width="14" stroke-linecap="round" fill="none" />
   <polygon points="100,126 84,102 116,102" fill="#E52330" />
 
-  <!-- Bottom Charcoal Radar Arcs -->
+  <!-- Official Black Bottom Radar Arcs -->
   <path d="M 60 114 A 42 42 0 0 0 140 114" stroke="#262626" stroke-width="14" stroke-linecap="round" fill="none" />
   <path d="M 40 125 A 65 65 0 0 0 160 125" stroke="#262626" stroke-width="16" stroke-linecap="round" fill="none" />
 </svg>
