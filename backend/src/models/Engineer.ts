@@ -28,7 +28,7 @@ export interface IEngineer extends Document {
 const EngineerSchema = new Schema<IEngineer>(
   {
     engineerId: { type: String, required: true, unique: true },
-    userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+    userId: { type: Schema.Types.Mixed, ref: 'User', required: true },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     email: { type: String, required: true },
@@ -37,7 +37,7 @@ const EngineerSchema = new Schema<IEngineer>(
     employeeId: { type: String, required: true, unique: true },
     department: { type: String, default: 'Field Operations' },
     designation: { type: String, default: 'Network Engineer' },
-    assignedBike: { type: Schema.Types.ObjectId, ref: 'Bike' },
+    assignedBike: { type: Schema.Types.Mixed, ref: 'Bike' },
     joiningDate: { type: Date, default: Date.now },
     status: {
       type: String,
@@ -47,8 +47,8 @@ const EngineerSchema = new Schema<IEngineer>(
     currentLatitude: { type: Number },
     currentLongitude: { type: Number },
     lastLocationUpdate: { type: Date },
-    activeTaskId: { type: Schema.Types.ObjectId, ref: 'Task' },
-    activeTripId: { type: Schema.Types.ObjectId, ref: 'Trip' }
+    activeTaskId: { type: Schema.Types.Mixed, ref: 'Task' },
+    activeTripId: { type: Schema.Types.Mixed, ref: 'Trip' }
   },
   { timestamps: true }
 );

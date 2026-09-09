@@ -35,9 +35,9 @@ export interface ITrip extends Document {
 const TripSchema = new Schema<ITrip>(
   {
     tripId: { type: String, required: true, unique: true },
-    engineerId: { type: Schema.Types.ObjectId, ref: 'Engineer', required: true },
-    taskId: { type: Schema.Types.ObjectId, ref: 'Task' },
-    bikeId: { type: Schema.Types.ObjectId, ref: 'Bike' },
+    engineerId: { type: Schema.Types.Mixed, ref: 'Engineer', required: true },
+    taskId: { type: Schema.Types.Mixed, ref: 'Task' },
+    bikeId: { type: Schema.Types.Mixed, ref: 'Bike' },
     startLatitude: { type: Number, required: true },
     startLongitude: { type: Number, required: true },
     startTime: { type: Date, default: Date.now },

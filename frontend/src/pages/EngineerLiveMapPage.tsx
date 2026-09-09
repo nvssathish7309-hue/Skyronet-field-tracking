@@ -31,6 +31,59 @@ export const EngineerLiveMapPage: React.FC = () => {
     autoFetchGps();
   }, []);
 
+  // Real-time tracking loop when ride is active
+  useEffect(() => {
+    const active = trips.find((t) => t.status === 'Active');
+    if (!active) return;
+
+    let watchId: number | null = null;
+    if (navigator.geolocation) {
+      watchId = navigator.geolocation.watchPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          setLiveCoords({ lat: latitude, lng: longitude });
+          try {
+            const res = await api.post('/engineers/location', { latitude, longitude });
+            if (res.data?.data?.activeTrip) {
+              setTrips((prev) =>
+                prev.map((t) => (t._id === active._id ? { ...t, ...res.data.data.activeTrip } : t))
+              );
+            }
+          } catch (_) {}
+        },
+        (err) => console.warn('GPS watch error:', err.message),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 3000 }
+      );
+    }
+
+    const interval = setInterval(async () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            try {
+              const res = await api.post('/engineers/location', {
+                latitude: pos.coords.latitude,
+                longitude: pos.coords.longitude
+              });
+              if (res.data?.data?.activeTrip) {
+                setTrips((prev) =>
+                  prev.map((t) => (t._id === active._id ? { ...t, ...res.data.data.activeTrip } : t))
+                );
+              }
+            } catch (_) {}
+          },
+          () => {},
+          { enableHighAccuracy: true }
+        );
+      }
+    }, 5000);
+
+    return () => {
+      if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+      clearInterval(interval);
+    };
+  }, [trips]);
+
   const autoFetchGps = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(

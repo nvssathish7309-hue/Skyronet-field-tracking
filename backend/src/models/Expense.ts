@@ -25,9 +25,9 @@ export interface IExpense extends Document {
 const ExpenseSchema = new Schema<IExpense>(
   {
     expenseId: { type: String, required: true, unique: true },
-    tripId: { type: Schema.Types.ObjectId, ref: 'Trip', required: true },
-    taskId: { type: Schema.Types.ObjectId, ref: 'Task' },
-    engineerId: { type: Schema.Types.ObjectId, ref: 'Engineer', required: true },
+    tripId: { type: Schema.Types.Mixed, ref: 'Trip', required: true },
+    taskId: { type: Schema.Types.Mixed, ref: 'Task' },
+    engineerId: { type: Schema.Types.Mixed, ref: 'Engineer', required: true },
     distanceKm: { type: Number, required: true },
     reimbursementRate: { type: Number, required: true },
     calculatedAmount: { type: Number, required: true },

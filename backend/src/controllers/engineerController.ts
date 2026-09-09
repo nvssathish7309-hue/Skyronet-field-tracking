@@ -397,6 +397,22 @@ export async function updateMyProfile(req: AuthRequest, res: Response) {
   }
 }
 
+function calcKm(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  if (!lat1 || !lon1 || !lat2 || !lon2) return 0;
+  if (lat1 === lat2 && lon1 === lon2) return 0;
+  const R = 6371;
+  const dLat = (lat2 - lat1) * (Math.PI / 180);
+  const dLon = (lon2 - lon1) * (Math.PI / 180);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * (Math.PI / 180)) *
+      Math.cos(lat2 * (Math.PI / 180)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return Math.round(R * c * 100) / 100;
+}
+
 export async function updateLocation(req: AuthRequest, res: Response) {
   try {
     const { latitude, longitude } = req.body;
@@ -408,9 +424,17 @@ export async function updateLocation(req: AuthRequest, res: Response) {
     const lng = Number(longitude);
 
     let engineer: any = null;
+    let activeTrip: any = null;
 
     if (mongoose.connection.readyState === 1) {
-      engineer = await Engineer.findOne({ userId: req.user!.userId });
+      try {
+        engineer = await Engineer.findOne({
+          $or: [{ userId: req.user!.userId }, { email: req.user!.email }]
+        });
+      } catch (_) {
+        engineer = await Engineer.findOne({ email: req.user!.email });
+      }
+
       if (engineer) {
         engineer.currentLatitude = lat;
         engineer.currentLongitude = lng;
@@ -420,20 +444,68 @@ export async function updateLocation(req: AuthRequest, res: Response) {
         }
         await engineer.save();
 
-        await User.findByIdAndUpdate(req.user!.userId, {
-          isOnline: true,
-          lastActive: new Date()
-        });
+        try {
+          await User.findByIdAndUpdate(req.user!.userId, {
+            isOnline: true,
+            lastActive: new Date()
+          });
+        } catch (_) {}
+
+        // Calculate live KM and RS for active trip
+        activeTrip = await Trip.findOne({ engineerId: engineer._id, status: 'Active' });
+        if (activeTrip) {
+          const pts = activeTrip.locationPoints || [];
+          const lastPt = pts.length > 0
+            ? pts[pts.length - 1]
+            : { latitude: activeTrip.startLatitude, longitude: activeTrip.startLongitude };
+
+          const distAdded = calcKm(lastPt.latitude, lastPt.longitude, lat, lng);
+          if (distAdded > 0.005) {
+            activeTrip.distanceKm = Math.round((activeTrip.distanceKm + distAdded) * 100) / 100;
+            activeTrip.totalAmount = Math.round((activeTrip.distanceKm * activeTrip.reimbursementRate) * 100) / 100;
+            activeTrip.locationPoints.push({
+              latitude: lat,
+              longitude: lng,
+              accuracy: 10,
+              timestamp: new Date()
+            });
+            await activeTrip.save();
+          }
+        }
       }
     } else {
       const store = getInMemoryStore();
-      engineer = store.engineers.find((e) => e.userId === req.user!.userId);
+      engineer = store.engineers.find(
+        (e) => e.userId === req.user!.userId || e.email === req.user!.email
+      );
+
       if (engineer) {
         engineer.currentLatitude = lat;
         engineer.currentLongitude = lng;
         engineer.lastLocationUpdate = new Date();
         if (engineer.status === 'Offline') {
           engineer.status = 'Available';
+        }
+
+        activeTrip = store.trips.find((t) => t.engineerId === engineer._id && t.status === 'Active');
+        if (activeTrip) {
+          const pts = activeTrip.locationPoints || [];
+          const lastPt = pts.length > 0
+            ? pts[pts.length - 1]
+            : { latitude: activeTrip.startLatitude, longitude: activeTrip.startLongitude };
+
+          const distAdded = calcKm(lastPt.latitude, lastPt.longitude, lat, lng);
+          if (distAdded > 0.005) {
+            activeTrip.distanceKm = Math.round((activeTrip.distanceKm + distAdded) * 100) / 100;
+            activeTrip.totalAmount = Math.round((activeTrip.distanceKm * activeTrip.reimbursementRate) * 100) / 100;
+            if (!activeTrip.locationPoints) activeTrip.locationPoints = [];
+            activeTrip.locationPoints.push({
+              latitude: lat,
+              longitude: lng,
+              accuracy: 10,
+              timestamp: new Date()
+            });
+          }
         }
       }
       const user = store.users.find((u) => u._id === req.user!.userId);
@@ -443,7 +515,7 @@ export async function updateLocation(req: AuthRequest, res: Response) {
       }
     }
 
-    // Broadcast live location via Socket.IO
+    // Broadcast live location & active trip update via Socket.IO
     const io = req.app.get('io');
     if (io && engineer) {
       io.emit('location:update', {
@@ -451,8 +523,18 @@ export async function updateLocation(req: AuthRequest, res: Response) {
         userId: req.user!.userId,
         latitude: lat,
         longitude: lng,
-        engineer
+        engineer,
+        activeTrip
       });
+      if (activeTrip) {
+        io.emit('trip:location-update', {
+          tripId: activeTrip._id,
+          distanceKm: activeTrip.distanceKm,
+          totalAmount: activeTrip.totalAmount,
+          latitude: lat,
+          longitude: lng
+        });
+      }
     }
 
     return res.json({
@@ -460,7 +542,8 @@ export async function updateLocation(req: AuthRequest, res: Response) {
       message: 'Location updated successfully',
       data: {
         latitude: lat,
-        longitude: lng
+        longitude: lng,
+        activeTrip
       }
     });
   } catch (error: any) {
