@@ -1,20 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
-  <!-- Red Top Radar Arcs -->
-  <!-- Outer Red Arc -->
-  <path d="M 32 80 A 80 80 0 0 1 168 80" stroke="#E52330" stroke-width="16" stroke-linecap="round" fill="none" />
-  <!-- Inner Red Arc -->
-  <path d="M 58 92 A 50 50 0 0 1 142 92" stroke="#E52330" stroke-width="14" stroke-linecap="round" fill="none" />
-  <!-- Center Red Inverted Wedge / Dot -->
-  <polygon points="100,122 86,98 114,98" fill="#E52330" />
-  <circle cx="100" cy="102" r="7" fill="#E52330" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- Crisp white circular container badge so emblem is 100% visible on dark & light browser tabs -->
+  <circle cx="100" cy="100" r="96" fill="#FFFFFF" />
+  <circle cx="100" cy="100" r="95" stroke="#E2E8F0" stroke-width="2" fill="none" />
 
-  <!-- Dark Charcoal Bottom Radar Arcs -->
-  <!-- Inner Dark Arc -->
-  <path d="M 62 118 A 50 50 0 0 0 138 118" stroke="#262626" stroke-width="14" stroke-linecap="round" fill="none" />
-  <!-- Outer Dark Arc -->
-  <path d="M 32 126 A 80 80 0 0 0 168 126" stroke="#262626" stroke-width="16" stroke-linecap="round" fill="none" />
-  <!-- Left Side Cap Arc -->
-  <path d="M 23 90 A 80 80 0 0 0 23 115" stroke="#262626" stroke-width="16" stroke-linecap="round" fill="none" />
-  <!-- Right Side Cap Arc -->
-  <path d="M 177 90 A 80 80 0 0 0 177 115" stroke="#262626" stroke-width="16" stroke-linecap="round" fill="none" />
+  <!-- Top Red Signal Waves -->
+  <path d="M 40 85 A 65 65 0 0 1 160 85" stroke="#E52330" stroke-width="16" stroke-linecap="round" fill="none" />
+  <path d="M 60 98 A 42 42 0 0 1 140 98" stroke="#E52330" stroke-width="14" stroke-linecap="round" fill="none" />
+  <polygon points="100,126 84,102 116,102" fill="#E52330" />
+
+  <!-- Bottom Charcoal Radar Arcs -->
+  <path d="M 60 114 A 42 42 0 0 0 140 114" stroke="#262626" stroke-width="14" stroke-linecap="round" fill="none" />
+  <path d="M 40 125 A 65 65 0 0 0 160 125" stroke="#262626" stroke-width="16" stroke-linecap="round" fill="none" />
 </svg>
