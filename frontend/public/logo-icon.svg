@@ -1,12 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
-  <!-- Top Red Radar Arcs & Center Pointer -->
-  <path d="M 32 80 A 70 70 0 0 1 168 80" stroke="#E52330" stroke-width="16" stroke-linecap="round" fill="none" />
-  <path d="M 54 96 A 48 48 0 0 1 146 96" stroke="#E52330" stroke-width="14" stroke-linecap="round" fill="none" />
-  <polygon points="100,126 81,100 119,100" fill="#E52330" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <!-- ChatGPT-style crisp white rounded square container badge -->
+  <rect x="4" y="4" width="192" height="192" rx="44" fill="#FFFFFF" />
+  <rect x="4" y="4" width="192" height="192" rx="44" stroke="#E2E8F0" stroke-width="2" fill="none" />
 
-  <!-- Bottom Black Arcs with Slit -->
-  <path d="M 54 112 A 48 48 0 0 0 91 144" stroke="#262626" stroke-width="14" stroke-linecap="round" fill="none" />
-  <path d="M 146 112 A 48 48 0 0 1 109 144" stroke="#262626" stroke-width="14" stroke-linecap="round" fill="none" />
-  <path d="M 32 128 A 70 70 0 0 0 89 168" stroke="#262626" stroke-width="16" stroke-linecap="round" fill="none" />
-  <path d="M 168 128 A 70 70 0 0 1 111 168" stroke="#262626" stroke-width="16" stroke-linecap="round" fill="none" />
+  <!-- Official Red Top Radar Waves -->
+  <path d="M 40 85 A 65 65 0 0 1 160 85" stroke="#E52330" stroke-width="16" stroke-linecap="round" fill="none" />
+  <path d="M 60 98 A 42 42 0 0 1 140 98" stroke="#E52330" stroke-width="14" stroke-linecap="round" fill="none" />
+  <polygon points="100,126 84,102 116,102" fill="#E52330" />
+
+  <!-- Official Black Bottom Radar Arcs -->
+  <path d="M 60 114 A 42 42 0 0 0 140 114" stroke="#262626" stroke-width="14" stroke-linecap="round" fill="none" />
+  <path d="M 40 125 A 65 65 0 0 0 160 125" stroke="#262626" stroke-width="16" stroke-linecap="round" fill="none" />
 </svg>

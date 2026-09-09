@@ -17,7 +17,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
     return (
       <div className={`flex items-center justify-center select-none ${className}`}>
         <img
-          src="/logo-icon.svg"
+          src="/logo-icon.png"
           alt="SKYRONET TECHNOLOGY"
           className={`${iconDimensions} object-contain transition-transform duration-200 hover:scale-105`}
         />
@@ -31,7 +31,7 @@ export const BrandLogo: React.FC<BrandLogoProps> = ({
   return (
     <div className={`flex items-center select-none overflow-hidden ${className}`}>
       <img
-        src="/logo.svg"
+        src="/logo.png"
         alt="SKYRONET TECHNOLOGY"
         className={`${fullHeight} w-auto object-contain transition-transform duration-200 hover:scale-102`}
       />
