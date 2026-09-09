@@ -127,7 +127,7 @@ export const LocationPickerModal: React.FC<LocationPickerModalProps> = ({ isOpen
           <button
             onClick={handleCustomConfirm}
             disabled={!customName || !customAddr}
-            className="w-full mt-3 py-2.5 bg-sky-600 hover:bg-sky-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2"
+            className="w-full mt-3 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2 shadow-md shadow-blue-500/20"
           >
             <Check className="w-4 h-4" /> Use Custom Location
           </button>

@@ -246,7 +246,7 @@ export const LiveMap: React.FC<LiveMapProps> = ({
       <button
         onClick={() => setViewMode('streets')}
         className={`px-2.5 py-1 text-[11px] font-bold rounded-lg flex items-center gap-1.5 transition-all ${
-          viewMode === 'streets' ? 'bg-sky-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
+          viewMode === 'streets' ? 'bg-blue-600 text-white shadow shadow-blue-500/30' : 'text-slate-400 hover:text-slate-200'
         }`}
       >
         <Globe className="w-3.5 h-3.5" />
@@ -255,7 +255,7 @@ export const LiveMap: React.FC<LiveMapProps> = ({
       <button
         onClick={() => setViewMode('dark')}
         className={`px-2.5 py-1 text-[11px] font-bold rounded-lg flex items-center gap-1.5 transition-all ${
-          viewMode === 'dark' ? 'bg-sky-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
+          viewMode === 'dark' ? 'bg-blue-600 text-white shadow shadow-blue-500/30' : 'text-slate-400 hover:text-slate-200'
         }`}
       >
         <Moon className="w-3.5 h-3.5" />
@@ -264,7 +264,7 @@ export const LiveMap: React.FC<LiveMapProps> = ({
       <button
         onClick={() => setViewMode('radar')}
         className={`px-2.5 py-1 text-[11px] font-bold rounded-lg flex items-center gap-1.5 transition-all ${
-          viewMode === 'radar' ? 'bg-sky-600 text-white shadow' : 'text-slate-400 hover:text-slate-200'
+          viewMode === 'radar' ? 'bg-blue-600 text-white shadow shadow-blue-500/30' : 'text-slate-400 hover:text-slate-200'
         }`}
       >
         <Radio className="w-3.5 h-3.5" />

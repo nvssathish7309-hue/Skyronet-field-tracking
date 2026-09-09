@@ -379,7 +379,7 @@ export const EngineerTaskDetailPage: React.FC = () => {
               multiple
               accept="image/*"
               onChange={(e) => setPhotos(e.target.files)}
-              className="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-sky-600 file:text-white"
+              className="w-full text-xs text-slate-400 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600 file:text-white"
             />
           </div>
 

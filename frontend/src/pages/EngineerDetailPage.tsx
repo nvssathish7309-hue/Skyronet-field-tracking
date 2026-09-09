@@ -243,7 +243,7 @@ export const EngineerDetailPage: React.FC = () => {
                 <button
                   type="submit"
                   disabled={submittingEdit}
-                  className="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white text-xs font-extrabold rounded-xl shadow-md disabled:opacity-50"
+                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-extrabold rounded-xl shadow-md shadow-blue-500/20 disabled:opacity-50"
                 >
                   {submittingEdit ? 'Saving...' : 'Save Changes'}
                 </button>

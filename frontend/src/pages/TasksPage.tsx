@@ -51,7 +51,7 @@ export const TasksPage: React.FC = () => {
         </div>
         <Link
           to="/tasks/create"
-          className="px-4 py-2.5 bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs rounded-xl shadow-md shadow-sky-600/20 flex items-center gap-2 self-start sm:self-auto transition-all"
+          className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 self-start sm:self-auto transition-all"
         >
           <Plus className="w-4 h-4" />
           <span>Assign New Task</span>
