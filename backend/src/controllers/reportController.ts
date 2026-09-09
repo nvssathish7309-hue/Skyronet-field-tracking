@@ -1,13 +1,50 @@
 import { Response } from 'express';
+import mongoose from 'mongoose';
 import { Engineer } from '../models/Engineer';
 import { Task } from '../models/Task';
 import { Trip } from '../models/Trip';
 import { Expense } from '../models/Expense';
 import { Bike } from '../models/Bike';
 import { AuthRequest } from '../middleware/auth';
+import { getInMemoryStore } from '../utils/inMemoryDB';
 
 export async function getDashboardStats(req: AuthRequest, res: Response) {
   try {
+    if (mongoose.connection.readyState !== 1) {
+      const store = getInMemoryStore();
+      const totalEngineers = store.engineers.length;
+      const activeEngineers = store.engineers.filter(e => ['Available', 'On Task', 'On The Way'].includes(e.status)).length;
+      const engineersOnTask = store.engineers.filter(e => ['On Task', 'On The Way'].includes(e.status)).length;
+      const todaysTasks = store.tasks.length;
+      const completedTasksToday = store.tasks.filter(t => t.status === 'Completed').length;
+      const pendingTasks = store.tasks.filter(t => ['Pending', 'Assigned', 'Accepted'].includes(t.status)).length;
+      const totalKmToday = store.trips.reduce((sum, t) => sum + (t.distanceKm || 0), 0);
+      const totalExpenseToday = store.trips.reduce((sum, t) => sum + (t.totalAmount || 0), 0);
+      const pendingExpenses = store.expenses.filter(e => e.status === 'Pending').length;
+      const approvedExpenses = store.expenses.filter(e => e.status === 'Approved').length;
+      const rejectedExpenses = store.expenses.filter(e => e.status === 'Rejected').length;
+
+      return res.json({
+        success: true,
+        data: {
+          totalEngineers,
+          activeEngineers,
+          engineersOnTask,
+          todaysTasks,
+          completedTasksToday,
+          pendingTasks,
+          totalKmToday: Math.round(totalKmToday * 10) / 10,
+          totalExpenseToday: Math.round(totalExpenseToday),
+          expensesSummary: {
+            pending: pendingExpenses,
+            approved: approvedExpenses,
+            rejected: rejectedExpenses
+          },
+          weeklyTrend: []
+        }
+      });
+    }
+
     const totalEngineers = await Engineer.countDocuments();
     const activeEngineers = await Engineer.countDocuments({
       status: { $in: ['Available', 'On Task', 'On The Way'] }

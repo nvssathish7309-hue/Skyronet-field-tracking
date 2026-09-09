@@ -33,10 +33,21 @@ import {
 
 export const AdminDashboard: React.FC = () => {
   const { socket } = useSocket();
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<any>({
+    totalEngineers: 0,
+    activeEngineers: 0,
+    engineersOnTask: 0,
+    todaysTasks: 0,
+    completedTasksToday: 0,
+    pendingTasks: 0,
+    totalKmToday: 0,
+    totalExpenseToday: 0,
+    expensesSummary: { pending: 0, approved: 0, rejected: 0 },
+    weeklyTrend: []
+  });
   const [engineers, setEngineers] = useState<Engineer[]>([]);
   const [recentTasks, setRecentTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [activeChartView, setActiveChartView] = useState<'area' | 'bar' | 'donut'>('area');
 
   useEffect(() => {
@@ -46,46 +57,43 @@ export const AdminDashboard: React.FC = () => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('engineer:location-update', () => {
+    const handleUpdate = () => {
       fetchDashboardData();
-    });
+    };
 
-    socket.on('task:status-updated', () => {
-      fetchDashboardData();
-    });
+    socket.on('engineer:location-update', handleUpdate);
+    socket.on('task:status-updated', handleUpdate);
 
     return () => {
-      socket.off('engineer:location-update');
-      socket.off('task:status-updated');
+      socket.off('engineer:location-update', handleUpdate);
+      socket.off('task:status-updated', handleUpdate);
     };
   }, [socket]);
 
   const fetchDashboardData = async () => {
     try {
-      const [resStats, resEng, resTasks] = await Promise.all([
+      setLoading(true);
+      const [resStats, resEng, resTasks] = await Promise.allSettled([
         api.get('/reports/dashboard'),
         api.get('/engineers'),
         api.get('/tasks?limit=5')
       ]);
 
-      if (resStats.data.success) setStats(resStats.data.data);
-      if (resEng.data.success) setEngineers(resEng.data.data);
-      if (resTasks.data.success) setRecentTasks(resTasks.data.data.slice(0, 5));
+      if (resStats.status === 'fulfilled' && resStats.value?.data?.success) {
+        setStats(resStats.value.data.data);
+      }
+      if (resEng.status === 'fulfilled' && resEng.value?.data?.success) {
+        setEngineers(resEng.value.data.data);
+      }
+      if (resTasks.status === 'fulfilled' && resTasks.value?.data?.success) {
+        setRecentTasks(resTasks.value.data.data.slice(0, 5));
+      }
     } catch (err) {
-      console.error(err);
+      console.error('Error fetching dashboard data:', err);
     } finally {
       setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center h-96 gap-3">
-        <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
-        <p className="text-xs font-extrabold text-slate-500">Loading Control Center Metrics...</p>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
