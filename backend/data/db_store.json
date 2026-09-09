@@ -1,0 +1,51 @@
+{
+  "users": [
+    {
+      "_id": "usr_superadmin",
+      "email": "superadmin@skyronet.com",
+      "password": "$2a$10$yos2wI8zznilyqK8sWQNhu7HeHrm4/V8TOzvYA0Xe.JL7bEnHJqqC",
+      "name": "Super Administrator",
+      "phone": "+91 98765 00001",
+      "role": "SUPER_ADMIN",
+      "isOnline": true,
+      "createdAt": "2026-09-09T10:08:39.184Z"
+    },
+    {
+      "_id": "usr_admin",
+      "email": "admin@skyronet.com",
+      "password": "$2a$10$yos2wI8zznilyqK8sWQNhu7HeHrm4/V8TOzvYA0Xe.JL7bEnHJqqC",
+      "name": "Admin Manager",
+      "phone": "+91 98765 00002",
+      "role": "ADMIN",
+      "isOnline": true,
+      "createdAt": "2026-09-09T10:08:39.184Z"
+    },
+    {
+      "_id": "usr_accounts",
+      "email": "accounts@skyronet.com",
+      "password": "$2a$10$5RC7ah/qLODbR1.HBkFc/us8I4qz67tCL/XkPAspyzCPSN2HzmPO.",
+      "name": "Accounts Executive",
+      "phone": "+91 98765 00003",
+      "role": "ACCOUNTS",
+      "isOnline": true,
+      "createdAt": "2026-09-09T10:08:39.184Z"
+    }
+  ],
+  "engineers": [],
+  "bikes": [],
+  "tasks": [],
+  "trips": [],
+  "expenses": [],
+  "notifications": [],
+  "auditLogs": [],
+  "settings": {
+    "twoWheelerRate": 2,
+    "maxReimbursementPerTrip": 2000,
+    "minAccuracyMeters": 50,
+    "gpsUpdateIntervalSeconds": 5,
+    "offlineTimeoutMinutes": 2,
+    "currency": "INR",
+    "currencySymbol": "₹",
+    "companyName": "Skyronet Networks"
+  }
+}

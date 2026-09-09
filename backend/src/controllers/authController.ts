@@ -5,7 +5,8 @@ import { Engineer } from '../models/Engineer';
 import { comparePassword, hashPassword } from '../utils/password';
 import { generateToken } from '../utils/jwt';
 import { AuthRequest } from '../middleware/auth';
-import { getInMemoryStore } from '../utils/inMemoryDB';
+import { getInMemoryStore, saveStoreToDisk } from '../utils/inMemoryDB';
+import { getIO } from '../socket';
 
 export async function login(req: Request, res: Response) {
   try {
@@ -285,6 +286,12 @@ export async function registerEngineer(req: Request, res: Response) {
       store.engineers.push(engObj);
     }
 
+    saveStoreToDisk();
+
+    try {
+      getIO().emit('engineer:location-update', { type: 'engineer:created', engineer: engObj });
+    } catch (_) {}
+
     const token = generateToken({
       userId: userObj._id.toString(),
       email: userObj.email,
@@ -293,7 +300,7 @@ export async function registerEngineer(req: Request, res: Response) {
 
     return res.status(201).json({
       success: true,
-      message: 'Field Engineer registered successfully',
+      message: 'Field Engineer registered successfully. You can now log in directly anytime using your email and password.',
       data: {
         token,
         user: {
@@ -378,6 +385,8 @@ export async function updateProfile(req: AuthRequest, res: Response) {
         }
       }
     }
+
+    saveStoreToDisk();
 
     return res.json({
       success: true,

@@ -6,7 +6,7 @@ import { User } from '../models/User';
 import { hashPassword } from '../utils/password';
 import { Trip } from '../models/Trip';
 import { Task } from '../models/Task';
-import { getInMemoryStore } from '../utils/inMemoryDB';
+import { getInMemoryStore, saveStoreToDisk } from '../utils/inMemoryDB';
 
 export async function getEngineers(req: AuthRequest, res: Response) {
   try {
@@ -218,6 +218,7 @@ export async function createEngineer(req: AuthRequest, res: Response) {
         joiningDate: new Date()
       };
       store.engineers.push(engObj);
+      saveStoreToDisk();
 
       return res.status(201).json({
         success: true,

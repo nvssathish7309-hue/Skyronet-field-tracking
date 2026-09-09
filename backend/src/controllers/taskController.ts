@@ -6,7 +6,7 @@ import { Notification } from '../models/Notification';
 import { AuditLog } from '../models/AuditLog';
 import { AuthRequest } from '../middleware/auth';
 import { getIO } from '../socket';
-import { getInMemoryStore } from '../utils/inMemoryDB';
+import { getInMemoryStore, saveStoreToDisk } from '../utils/inMemoryDB';
 
 export async function getTasks(req: AuthRequest, res: Response) {
   try {
@@ -170,6 +170,7 @@ export async function createTask(req: AuthRequest, res: Response) {
       };
 
       store.tasks.unshift(newTask);
+      saveStoreToDisk();
 
       try {
         getIO().emit('task:status-updated', { taskId: newTask._id, status: newTask.status });
