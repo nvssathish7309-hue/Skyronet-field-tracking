@@ -4,7 +4,8 @@ import {
   getEngineerById,
   createEngineer,
   updateEngineer,
-  updateMyProfile
+  updateMyProfile,
+  updateLocation
 } from '../controllers/engineerController';
 import { protect, authorize } from '../middleware/auth';
 
@@ -12,6 +13,7 @@ const router = Router();
 
 router.use(protect);
 
+router.post('/location', updateLocation);
 router.put('/profile', updateMyProfile);
 router.get('/', getEngineers);
 router.get('/:id', getEngineerById);

@@ -333,3 +333,74 @@ export async function updateMyProfile(req: AuthRequest, res: Response) {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
+
+export async function updateLocation(req: AuthRequest, res: Response) {
+  try {
+    const { latitude, longitude } = req.body;
+    if (latitude === undefined || longitude === undefined) {
+      return res.status(400).json({ success: false, message: 'Latitude and longitude are required' });
+    }
+
+    const lat = Number(latitude);
+    const lng = Number(longitude);
+
+    let engineer: any = null;
+
+    if (mongoose.connection.readyState === 1) {
+      engineer = await Engineer.findOne({ userId: req.user!.userId });
+      if (engineer) {
+        engineer.currentLatitude = lat;
+        engineer.currentLongitude = lng;
+        engineer.lastLocationUpdate = new Date();
+        if (engineer.status === 'Offline') {
+          engineer.status = 'Available';
+        }
+        await engineer.save();
+
+        await User.findByIdAndUpdate(req.user!.userId, {
+          isOnline: true,
+          lastActive: new Date()
+        });
+      }
+    } else {
+      const store = getInMemoryStore();
+      engineer = store.engineers.find((e) => e.userId === req.user!.userId);
+      if (engineer) {
+        engineer.currentLatitude = lat;
+        engineer.currentLongitude = lng;
+        engineer.lastLocationUpdate = new Date();
+        if (engineer.status === 'Offline') {
+          engineer.status = 'Available';
+        }
+      }
+      const user = store.users.find((u) => u._id === req.user!.userId);
+      if (user) {
+        user.isOnline = true;
+        user.lastActive = new Date();
+      }
+    }
+
+    // Broadcast live location via Socket.IO
+    const io = req.app.get('io');
+    if (io && engineer) {
+      io.emit('location:update', {
+        engineerId: engineer._id,
+        userId: req.user!.userId,
+        latitude: lat,
+        longitude: lng,
+        engineer
+      });
+    }
+
+    return res.json({
+      success: true,
+      message: 'Location updated successfully',
+      data: {
+        latitude: lat,
+        longitude: lng
+      }
+    });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+}

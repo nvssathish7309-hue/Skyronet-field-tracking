@@ -15,14 +15,39 @@ export const EngineerLiveMapPage: React.FC = () => {
   const [startingRide, setStartingRide] = useState(false);
   const [stoppingRide, setStoppingRide] = useState(false);
 
-  // Live coordinates
+  // Live coordinates state
   const eng = user?.engineer;
-  const currentLat = eng?.currentLatitude || 11.0168;
-  const currentLng = eng?.currentLongitude || 76.9558;
+  const [liveCoords, setLiveCoords] = useState<{ lat: number; lng: number } | null>(
+    eng?.currentLatitude && eng?.currentLongitude
+      ? { lat: eng.currentLatitude, lng: eng.currentLongitude }
+      : null
+  );
+
+  const currentLat = liveCoords?.lat || eng?.currentLatitude || 11.0168;
+  const currentLng = liveCoords?.lng || eng?.currentLongitude || 76.9558;
 
   useEffect(() => {
     fetchData();
+    autoFetchGps();
   }, []);
+
+  const autoFetchGps = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          setLiveCoords({ lat: latitude, lng: longitude });
+          try {
+            await api.post('/engineers/location', { latitude, longitude });
+          } catch (_) {}
+        },
+        (err) => {
+          console.warn('GPS position error:', err.message);
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+      );
+    }
+  };
 
   const fetchData = async () => {
     try {
@@ -50,6 +75,7 @@ export const EngineerLiveMapPage: React.FC = () => {
       async (position) => {
         try {
           const { latitude, longitude } = position.coords;
+          setLiveCoords({ lat: latitude, lng: longitude });
           await api.post('/engineers/location', { latitude, longitude });
           await fetchData();
         } catch (err) {
@@ -61,8 +87,9 @@ export const EngineerLiveMapPage: React.FC = () => {
       (err) => {
         console.error(err);
         setUpdatingLocation(false);
-        alert('Could not fetch GPS location. Please allow location permissions.');
-      }
+        alert('Could not fetch GPS location. Please allow location permissions in your browser/device settings.');
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
     );
   };
 

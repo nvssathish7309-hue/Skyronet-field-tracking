@@ -19,25 +19,30 @@ export const LiveTrackingPage: React.FC = () => {
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('engineer:location-update', (data: any) => {
+    const handleLocationUpdate = (data: any) => {
+      const targetId = data.engineerId || data.userId;
       setEngineers((prev) =>
         prev.map((e) => {
-          if (e._id === data.engineerId) {
+          if (e._id === targetId || e.userId === targetId || (e.userId as any)?._id === targetId) {
             return {
               ...e,
               currentLatitude: data.latitude,
               currentLongitude: data.longitude,
-              lastLocationUpdate: data.lastUpdated,
-              status: data.status
+              lastLocationUpdate: data.lastUpdated || new Date().toISOString(),
+              status: data.status || e.status
             };
           }
           return e;
         })
       );
-    });
+    };
+
+    socket.on('location:update', handleLocationUpdate);
+    socket.on('engineer:location-update', handleLocationUpdate);
 
     return () => {
-      socket.off('engineer:location-update');
+      socket.off('location:update', handleLocationUpdate);
+      socket.off('engineer:location-update', handleLocationUpdate);
     };
   }, [socket]);
 
