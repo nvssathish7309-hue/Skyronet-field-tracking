@@ -209,8 +209,8 @@ export async function seedInMemoryStore() {
     startTime: new Date(Date.now() - 45 * 60 * 1000),
     distanceKm: 18.6,
     tripType: 'One Way',
-    reimbursementRate: 5,
-    totalAmount: 93,
+    reimbursementRate: 2,
+    totalAmount: 37.2,
     status: 'Active',
     locationPoints: [
       { latitude: 11.0168, longitude: 76.9558, accuracy: 5, timestamp: new Date(Date.now() - 45 * 60 * 1000) },
@@ -227,9 +227,9 @@ export async function seedInMemoryStore() {
     taskId: task1,
     engineerId: eng1,
     distanceKm: 18.6,
-    reimbursementRate: 5,
-    calculatedAmount: 93,
-    submittedAmount: 93,
+    reimbursementRate: 2,
+    calculatedAmount: 37.2,
+    submittedAmount: 37.2,
     status: 'Pending',
     submittedAt: new Date(Date.now() - 10 * 60 * 1000)
   };
@@ -237,7 +237,7 @@ export async function seedInMemoryStore() {
   store.expenses = [exp1];
 
   store.settings = {
-    twoWheelerRate: 5,
+    twoWheelerRate: 2,
     maxReimbursementPerTrip: 2000,
     minAccuracyMeters: 50,
     gpsUpdateIntervalSeconds: 5,

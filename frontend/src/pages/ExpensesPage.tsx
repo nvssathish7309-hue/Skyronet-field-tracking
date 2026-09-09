@@ -85,14 +85,10 @@ export const ExpensesPage: React.FC = () => {
   const handleUpdateFuelPrice = async (e: React.FormEvent) => {
     e.preventDefault();
     setUpdatingFuel(true);
-    const p = parseFloat(newPetrolPrice) || 110;
-    const m = parseFloat(newMileage) || 55;
-    const calcRate = parseFloat((p / m).toFixed(2));
+    const calcRate = parseFloat(newPetrolPrice) || 2.0;
 
     try {
       const res = await api.put('/settings', {
-        petrolPricePerLiter: p,
-        defaultMileage: m,
         twoWheelerRate: calcRate
       });
       if (res.data.success) {
@@ -100,7 +96,7 @@ export const ExpensesPage: React.FC = () => {
         setShowFuelModal(false);
       }
     } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to update petrol price');
+      alert(err.response?.data?.message || 'Failed to update reimbursement rate');
     } finally {
       setUpdatingFuel(false);
     }
@@ -149,9 +145,7 @@ export const ExpensesPage: React.FC = () => {
     );
   });
 
-  const petrolPrice = settings?.petrolPricePerLiter || 110;
-  const mileage = settings?.defaultMileage || 55;
-  const ratePerKm = settings?.twoWheelerRate || petrolPrice / mileage;
+  const ratePerKm = settings?.twoWheelerRate || 2.0;
 
   return (
     <div className="space-y-6 font-sans">
@@ -163,18 +157,18 @@ export const ExpensesPage: React.FC = () => {
             <span>Accounts & Travel Reimbursement Controls</span>
           </h1>
           <p className="text-xs font-medium text-slate-500 mt-1">
-            Recorded ride start/stop locations, travel distance (KM), rate calculation & expense approval for Accounts
+            Recorded ride start/stop locations, travel distance (KM), rate calculation (Distance × ₹2.00/KM) & expense approval for Accounts
           </p>
         </div>
 
-        {/* Real-time Fuel Badge for Admin & Accounts */}
+        {/* Real-time Rate Badge for Admin & Accounts */}
         <div className="bg-gradient-to-r from-blue-900 to-slate-900 text-white rounded-2xl p-3.5 px-4 shadow-sm flex items-center gap-4 shrink-0">
           <div className="flex items-center gap-2">
             <Fuel className="w-5 h-5 text-amber-400" />
             <div>
-              <div className="text-[10px] text-blue-200 font-extrabold uppercase tracking-wider">Live Fuel Rate</div>
+              <div className="text-[10px] text-blue-200 font-extrabold uppercase tracking-wider">Reimbursement Rate</div>
               <div className="text-xs font-black text-white">
-                ₹{petrolPrice}/L ÷ {mileage} KM/L = <span className="text-amber-400 font-mono text-sm">₹{ratePerKm.toFixed(2)} / KM</span>
+                Standard Rate: <span className="text-amber-400 font-mono text-sm">₹{ratePerKm.toFixed(2)} / KM</span>
               </div>
             </div>
           </div>
@@ -182,7 +176,7 @@ export const ExpensesPage: React.FC = () => {
           <button
             onClick={() => setShowFuelModal(true)}
             className="p-2 bg-blue-600 hover:bg-blue-500 rounded-xl text-white text-xs font-bold flex items-center gap-1 transition-all shrink-0 shadow-sm"
-            title="Edit Petrol Price & Mileage"
+            title="Edit Rate per KM"
           >
             <Edit3 className="w-3.5 h-3.5" />
             <span className="hidden sm:inline">Update Rate</span>
@@ -263,8 +257,8 @@ export const ExpensesPage: React.FC = () => {
                 ) : (
                   filteredExpenses.map((e) => {
                     const bike = e.engineerId?.assignedBike;
-                    const bikeMileage = bike?.mileage || mileage;
-                    const calcRate = e.reimbursementRate || (petrolPrice / bikeMileage);
+                    const calcRate = e.reimbursementRate || ratePerKm || 2.0;
+                    const calculatedAmount = Math.round(e.distanceKm * calcRate * 100) / 100;
                     const trip = e.tripId as Trip | undefined;
 
                     const startLat = trip?.startLatitude || (e.engineerId as any)?.currentLatitude || 11.0168;
@@ -331,7 +325,7 @@ export const ExpensesPage: React.FC = () => {
 
                         {/* Total Reimbursement Amount */}
                         <td className="py-4 px-4">
-                          <div className="font-black text-slate-900 text-base font-mono text-amber-700">₹{e.calculatedAmount}</div>
+                          <div className="font-black text-slate-900 text-base font-mono text-amber-700">₹{calculatedAmount}</div>
                           <div className="text-[10px] text-slate-400 font-medium">{e.distanceKm} KM × ₹{calcRate.toFixed(2)}</div>
                         </td>
 
@@ -474,14 +468,14 @@ export const ExpensesPage: React.FC = () => {
         </div>
       )}
 
-      {/* Quick Fuel Price & Mileage Edit Modal */}
+      {/* Quick Reimbursement Rate Edit Modal */}
       {showFuelModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
           <form onSubmit={handleUpdateFuelPrice} className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-black text-slate-900 text-sm tracking-wide flex items-center gap-2">
                 <Fuel className="w-5 h-5 text-amber-500" />
-                <span>Update Real-Time Petrol Price</span>
+                <span>Update Travel Reimbursement Rate</span>
               </h3>
               <button
                 type="button"
@@ -494,34 +488,23 @@ export const ExpensesPage: React.FC = () => {
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-extrabold text-slate-700 mb-1">Petrol Price (₹ / Liter)</label>
+                <label className="block text-xs font-extrabold text-slate-700 mb-1">Reimbursement Rate (₹ / KM)</label>
                 <input
                   type="number"
-                  step="0.01"
+                  step="0.10"
                   required
+                  placeholder="2.00"
                   value={newPetrolPrice}
                   onChange={(e) => setNewPetrolPrice(e.target.value)}
                   className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-black text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-extrabold text-slate-700 mb-1">Default Bike Mileage (KM / Liter)</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  required
-                  value={newMileage}
-                  onChange={(e) => setNewMileage(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-black text-slate-900 focus:bg-white focus:border-blue-600 outline-none"
-                />
-              </div>
-
               {/* Live Preview in Modal */}
               <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-xs font-extrabold text-amber-900 flex items-center justify-between font-mono">
-                <span>Calculated Rate:</span>
+                <span>Calculation Preview (18.6 KM):</span>
                 <span className="text-sm font-black text-amber-700">
-                  ₹{(parseFloat(newPetrolPrice) / Math.max(parseFloat(newMileage) || 1, 1)).toFixed(2)} / KM
+                  18.6 KM × ₹{(parseFloat(newPetrolPrice) || 2.0).toFixed(2)} = ₹{(18.6 * (parseFloat(newPetrolPrice) || 2.0)).toFixed(2)}
                 </span>
               </div>
             </div>

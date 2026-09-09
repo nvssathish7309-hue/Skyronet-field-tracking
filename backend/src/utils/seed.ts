@@ -24,7 +24,7 @@ export async function seedDatabase() {
 
     // Create System Settings
     await SystemSettings.create({
-      twoWheelerRate: 5,
+      twoWheelerRate: 2,
       maxReimbursementPerTrip: 2000,
       minAccuracyMeters: 50,
       gpsUpdateIntervalSeconds: 5,
@@ -281,8 +281,8 @@ export async function seedDatabase() {
       startTime: new Date(Date.now() - 45 * 60 * 1000), // 45 mins ago
       distanceKm: 18.6,
       tripType: 'One Way',
-      reimbursementRate: 5,
-      totalAmount: 93,
+      reimbursementRate: 2,
+      totalAmount: 37.2,
       status: 'Active',
       locationPoints: [
         { latitude: 11.0168, longitude: 76.9558, accuracy: 5, timestamp: new Date(Date.now() - 45 * 60 * 1000) },
@@ -308,8 +308,8 @@ export async function seedDatabase() {
       endTime: new Date(Date.now() - 120 * 60 * 1000),
       distanceKm: 24.2,
       tripType: 'Round Trip',
-      reimbursementRate: 5,
-      totalAmount: 242,
+      reimbursementRate: 2,
+      totalAmount: 96.8,
       status: 'Completed',
       locationPoints: [
         { latitude: 11.0168, longitude: 76.9558, accuracy: 6, timestamp: new Date(Date.now() - 180 * 60 * 1000) },
@@ -323,9 +323,9 @@ export async function seedDatabase() {
       taskId: createdTasks[4]._id,
       engineerId: createdEngineers[0]._id,
       distanceKm: 48.4,
-      reimbursementRate: 5,
-      calculatedAmount: 242,
-      submittedAmount: 242,
+      reimbursementRate: 2,
+      calculatedAmount: 96.8,
+      submittedAmount: 96.8,
       status: 'Pending',
       submittedAt: new Date(Date.now() - 120 * 60 * 1000)
     });

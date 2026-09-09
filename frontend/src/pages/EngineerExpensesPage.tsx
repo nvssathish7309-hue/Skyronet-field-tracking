@@ -43,9 +43,7 @@ export const EngineerExpensesPage: React.FC = () => {
     }
   };
 
-  const petrolPrice = settings?.petrolPricePerLiter || 110;
-  const defaultMileage = settings?.defaultMileage || 55;
-  const ratePerKm = settings?.twoWheelerRate || (petrolPrice / defaultMileage);
+  const ratePerKm = settings?.twoWheelerRate || 2.0;
 
   const handleSubmitClaim = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -107,9 +105,9 @@ export const EngineerExpensesPage: React.FC = () => {
             <Fuel className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-[10px] font-black text-blue-200 uppercase tracking-wider">Official Fuel Rate</div>
+            <div className="text-[10px] font-black text-blue-200 uppercase tracking-wider">Official Reimbursement Rate</div>
             <div className="text-xs font-black text-white mt-0.5">
-              Petrol @ ₹{petrolPrice}/L ÷ {defaultMileage} KM/L
+              Standard Rate: ₹{ratePerKm.toFixed(2)} / KM
             </div>
           </div>
         </div>

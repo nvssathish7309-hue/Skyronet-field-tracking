@@ -46,7 +46,7 @@ const TripSchema = new Schema<ITrip>(
     endTime: { type: Date },
     distanceKm: { type: Number, default: 0 },
     tripType: { type: String, enum: ['One Way', 'Round Trip'], default: 'One Way' },
-    reimbursementRate: { type: Number, default: 5 },
+    reimbursementRate: { type: Number, default: 2 },
     totalAmount: { type: Number, default: 0 },
     status: {
       type: String,
