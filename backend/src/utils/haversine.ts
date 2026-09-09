@@ -26,8 +26,20 @@ function toRad(deg: number): number {
 }
 
 /**
+ * Minimum real movement required between two GPS pings to count as distance.
+ * GPS satellites have natural drift of 3–15 meters even when stationary.
+ * Any movement below this threshold is treated as GPS noise and ignored.
+ * 10 meters = 0.010 km — below this, the engineer is considered stationary.
+ */
+const MIN_MOVEMENT_METERS = 10; // meters
+const MIN_MOVEMENT_KM = MIN_MOVEMENT_METERS / 1000;
+
+/**
  * Validates whether a new GPS point is valid or should be filtered out.
- * Rejects points with poor accuracy (> 50m) or unrealistic speed jumps (> 150 km/h).
+ * Rejects points with:
+ *  - Poor accuracy (> maxAccuracyMeters)
+ *  - Unrealistic speed jumps (> 150 km/h)
+ *  - Movement below MIN_MOVEMENT_METERS (GPS drift / stationary noise)
  */
 export function isValidGPSPoint(
   prevLat: number,
@@ -45,6 +57,19 @@ export function isValidGPSPoint(
   }
 
   const distKm = calculateHaversineDistance(prevLat, prevLon, newLat, newLon);
+
+  // ── Stationary / GPS-drift filter ──────────────────────────────────────────
+  // If the calculated distance is less than MIN_MOVEMENT_METERS, the engineer
+  // hasn't physically moved — this is GPS satellite noise. Reject the point so
+  // no phantom distance is added to the trip.
+  if (distKm < MIN_MOVEMENT_KM) {
+    return {
+      valid: false,
+      reason: `Movement ${Math.round(distKm * 1000)}m below minimum threshold ${MIN_MOVEMENT_METERS}m — stationary noise filtered`,
+      distanceKm: 0
+    };
+  }
+  // ───────────────────────────────────────────────────────────────────────────
 
   // Time diff in hours
   const timeDiffHours = (new Date(newTime).getTime() - new Date(prevTime).getTime()) / (1000 * 60 * 60);
@@ -66,3 +91,4 @@ export function isValidGPSPoint(
 
   return { valid: true, distanceKm: distKm };
 }
+
