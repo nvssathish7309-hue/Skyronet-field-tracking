@@ -100,3 +100,24 @@
   position: relative;
   z-index: 1;
 }
+
+/* ── Bell shake on new notification ── */
+@keyframes bell-shake {
+  0%   { transform: rotate(0deg); }
+  10%  { transform: rotate(-18deg); }
+  20%  { transform: rotate(18deg); }
+  30%  { transform: rotate(-14deg); }
+  40%  { transform: rotate(14deg); }
+  50%  { transform: rotate(-8deg); }
+  60%  { transform: rotate(8deg); }
+  70%  { transform: rotate(-4deg); }
+  80%  { transform: rotate(4deg); }
+  90%  { transform: rotate(-2deg); }
+  100% { transform: rotate(0deg); }
+}
+
+.bell-shake {
+  animation: bell-shake 0.7s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  transform-origin: top center;
+}
+

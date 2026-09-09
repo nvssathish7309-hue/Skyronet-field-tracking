@@ -35,6 +35,8 @@ export const DesktopLayout: React.FC<{ children: React.ReactNode }> = ({ childre
   const [searchQuery, setSearchQuery] = useState('');
   const [collapsed, setCollapsed] = useState(false);
   const [unreadCount, setUnreadCount] = useState<number>(0);
+  const [bellShaking, setBellShaking] = useState(false);
+  const prevUnreadRef = React.useRef<number>(0);
 
   useEffect(() => {
     const fetchUnreadCount = async () => {
@@ -42,6 +44,12 @@ export const DesktopLayout: React.FC<{ children: React.ReactNode }> = ({ childre
         const res = await api.get('/notifications');
         if (res.data.success && Array.isArray(res.data.data)) {
           const count = res.data.data.filter((n: any) => !n.isRead).length;
+          // Shake bell only when new notifications arrive
+          if (count > prevUnreadRef.current) {
+            setBellShaking(true);
+            setTimeout(() => setBellShaking(false), 800);
+          }
+          prevUnreadRef.current = count;
           setUnreadCount(count);
         }
       } catch (err) {
@@ -259,7 +267,7 @@ export const DesktopLayout: React.FC<{ children: React.ReactNode }> = ({ childre
                   className="relative w-9 h-9 rounded-full bg-white flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-all"
                   title="Notifications"
                 >
-                  <Bell className="w-4 h-4" />
+                  <Bell className={`w-4 h-4 ${bellShaking ? 'bell-shake' : ''}`} />
                 </Link>
               </div>
               {unreadCount > 0 && (
@@ -271,10 +279,15 @@ export const DesktopLayout: React.FC<{ children: React.ReactNode }> = ({ childre
 
             <div className="h-6 w-px bg-slate-200" />
 
-            {/* User Avatar Chip */}
+            {/* User Avatar Chip — spinning gradient border on avatar */}
             <Link to="/profile" className="flex items-center gap-3 group p-1 rounded-xl hover:bg-slate-50 transition-all cursor-pointer" title="Edit My Profile">
-              <div className="w-9 h-9 rounded-full bg-blue-600 group-hover:bg-blue-700 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/20 ring-2 ring-blue-100 transition-all">
-                {userInitials}
+              {/* Spin border wraps only the circle avatar */}
+              <div className="spin-border-wrapper shrink-0" style={{ borderRadius: '9999px' }}>
+                <div className="spin-border-inner" style={{ borderRadius: '9999px' }}>
+                  <div className="w-9 h-9 rounded-full bg-blue-600 group-hover:bg-blue-700 text-white font-black text-xs flex items-center justify-center transition-all">
+                    {userInitials}
+                  </div>
+                </div>
               </div>
               <div className="text-left hidden sm:block">
                 <div className="font-black text-xs text-slate-900 group-hover:text-blue-600 tracking-tight transition-all">{user?.name || 'Super Admin'}</div>
@@ -286,14 +299,18 @@ export const DesktopLayout: React.FC<{ children: React.ReactNode }> = ({ childre
               </div>
             </Link>
 
-            {/* Quick Logout Button */}
-            <button
-              onClick={logout}
-              className="p-2 text-slate-400 hover:text-rose-600 rounded-full hover:bg-rose-50 transition-all"
-              title="Logout"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
+            {/* Quick Logout Button — spinning gradient border */}
+            <div className="spin-border-wrapper" style={{ borderRadius: '9999px' }}>
+              <div className="spin-border-inner" style={{ borderRadius: '9999px' }}>
+                <button
+                  onClick={logout}
+                  className="p-2 text-slate-500 hover:text-rose-600 rounded-full bg-white hover:bg-rose-50 transition-all flex items-center justify-center"
+                  title="Logout"
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
           </div>
         </header>
 
