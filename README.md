@@ -92,18 +92,17 @@ The database automatically populates with pre-seeded demo accounts upon first st
 | Role | Email | Password |
 | :--- | :--- | :--- |
 | **Super Admin** | `superadmin@fieldtrack.com` | `admin123` |
-| **Admin** | `admin@fieldtrack.com` | `admin123` |
-| **Accounts** | `accounts@fieldtrack.com` | `admin123` |
-| **Field Engineer 1** | `engineer1@fieldtrack.com` | `admin123` |
-| **Field Engineer 2** | `engineer2@fieldtrack.com` | `admin123` |
+| **Super Admin** | `superadmin@skyronet.com` | `admin@123` |
+| **Admin** | `admin@skyronet.com` | `admin@123` |
+| **Accounts** | `accounts@skyronet.com` | `account@123` |
 
 ---
 
 ## 🔄 End-to-End Workflow Demonstration
 
-1. **Admin Login**: Sign in as `admin@fieldtrack.com`.
-2. **Create Task**: Go to `Field Tasks` -> `Assign New Task`. Select location coordinates and assign to **Field Engineer (FE-0001)**.
-3. **Engineer Mobile Login**: Open a second window/tab or mobile device and sign in as `engineer1@fieldtrack.com`.
+1. **Admin Login**: Sign in as `admin@skyronet.com`.
+2. **Register Engineer / Create Task**: Register or add a new Field Engineer, then go to `Field Tasks` -> `Assign New Task`. Select location coordinates and assign to your Field Engineer.
+3. **Engineer Mobile Login**: Open a second window/tab or mobile device and sign in with your Field Engineer credentials.
 4. **Start Trip**: Open the assigned task and click `[ START TRIP & BEGIN GPS TRACKING ]`.
 5. **Real-time Map**: On the Admin dashboard, navigate to `Live Tracking` (`/live-tracking`) to watch the engineer's marker update live on the map.
 6. **Task Completion**: On the mobile app, click `[ MARK ARRIVED ]` -> `[ COMPLETE TASK ]` and upload site photos.

@@ -65,54 +65,11 @@ export async function seedDatabase() {
       isOnline: true
     });
 
-    // 2. Create Field Engineer & User
-    const engUser = await User.create({
-      email: 'engineer1@skyronet.com',
-      password: adminPassword,
-      name: 'Field Engineer',
-      phone: '+91 98765 11111',
-      role: 'FIELD_ENGINEER',
-      isOnline: true
-    });
-
-    const engineer = await Engineer.create({
-      engineerId: 'FE-0001',
-      userId: engUser._id,
-      firstName: 'Field',
-      lastName: 'Engineer',
-      email: 'engineer1@skyronet.com',
-      phone: '+91 98765 11111',
-      employeeId: 'EMP-1001',
-      department: 'Field Operations',
-      designation: 'Network Engineer',
-      status: 'Available',
-      currentLatitude: 11.0168,
-      currentLongitude: 76.9558,
-      lastLocationUpdate: new Date()
-    });
-
-    // 3. Create Bike
-    const bike = await Bike.create({
-      bikeId: 'BIKE-001',
-      engineerId: engineer._id,
-      bikeNumber: 'TN 38 AB 1234',
-      bikeModel: 'Honda Splendor Plus',
-      manufacturer: 'Hero',
-      fuelType: 'Petrol',
-      mileage: 55,
-      status: 'Active',
-      assignedDate: new Date()
-    });
-
-    engineer.assignedBike = bike._id as any;
-    await engineer.save();
-
     console.log('✅ FieldTrack 360 database seed completed successfully!');
     console.log('🔑 System Login Accounts:');
     console.log('   - Super Admin: superadmin@skyronet.com / admin@123');
     console.log('   - Admin:       admin@skyronet.com / admin@123');
     console.log('   - Accounts:    accounts@skyronet.com / account@123');
-    console.log('   - Engineer:    engineer1@skyronet.com / admin@123');
   } catch (error) {
     console.error('❌ Error seeding database:', error);
   }

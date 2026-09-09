@@ -66,52 +66,9 @@ export async function seedInMemoryStore() {
     createdAt: new Date()
   };
 
-  const eng1User = {
-    _id: 'usr_eng1',
-    email: 'engineer1@skyronet.com',
-    password: adminPassword,
-    name: 'Field Engineer',
-    phone: '+91 98765 11111',
-    role: 'FIELD_ENGINEER',
-    isOnline: true,
-    createdAt: new Date()
-  };
-
-  store.users = [superAdmin, admin, accounts, eng1User];
-
-  const bike1 = {
-    _id: 'bike_1',
-    bikeId: 'BIKE-001',
-    bikeNumber: 'TN 38 AB 1234',
-    bikeModel: 'Honda Splendor Plus',
-    manufacturer: 'Hero',
-    fuelType: 'Petrol',
-    mileage: 55,
-    status: 'Active',
-    assignedDate: new Date()
-  };
-
-  store.bikes = [bike1];
-
-  const eng1 = {
-    _id: 'eng_1',
-    engineerId: 'FE-0001',
-    userId: eng1User._id,
-    firstName: 'Field',
-    lastName: 'Engineer',
-    email: 'engineer1@skyronet.com',
-    phone: '+91 98765 11111',
-    employeeId: 'EMP-1001',
-    department: 'Field Operations',
-    designation: 'Network Engineer',
-    assignedBike: bike1,
-    status: 'Available',
-    currentLatitude: 11.0168,
-    currentLongitude: 76.9558,
-    lastLocationUpdate: new Date()
-  };
-
-  store.engineers = [eng1];
+  store.users = [superAdmin, admin, accounts];
+  store.bikes = [];
+  store.engineers = [];
   store.tasks = [];
   store.trips = [];
   store.expenses = [];
