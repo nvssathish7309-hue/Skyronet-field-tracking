@@ -45,14 +45,76 @@ export async function login(req: Request, res: Response) {
       role: user.role
     });
 
-    let engineerInfo = null;
+    // Mark user online
+    if (mongoose.connection.readyState === 1) {
+      await User.findByIdAndUpdate(user._id, { isOnline: true, lastActive: new Date() });
+      user.isOnline = true;
+    } else {
+      user.isOnline = true;
+      user.lastActive = new Date();
+    }
+
+    let engineerInfo: any = null;
     if (user.role === 'FIELD_ENGINEER') {
       if (mongoose.connection.readyState === 1) {
         engineerInfo = await Engineer.findOne({ userId: user._id }).populate('assignedBike');
+
+        if (!engineerInfo) {
+          const count = await Engineer.countDocuments();
+          const engId = `FE-${String(count + 1).padStart(4, '0')}`;
+          const empId = `EMP-${String(count + 1).padStart(4, '0')}`;
+          const nameParts = (user.name || 'Field Engineer').split(' ');
+          const firstName = nameParts[0] || 'Field';
+          const lastName = nameParts.slice(1).join(' ') || 'Engineer';
+
+          engineerInfo = await Engineer.create({
+            engineerId: engId,
+            userId: user._id,
+            firstName,
+            lastName,
+            email: user.email,
+            phone: user.phone || '',
+            employeeId: empId,
+            department: 'Field Operations',
+            designation: 'Field Engineer',
+            status: 'Available',
+            joiningDate: user.createdAt || new Date()
+          });
+        } else if (engineerInfo.status === 'Offline') {
+          engineerInfo.status = 'Available';
+          await engineerInfo.save();
+        }
       }
+
       if (!engineerInfo) {
         const store = getInMemoryStore();
         engineerInfo = store.engineers.find((e) => e.userId === user._id || e.email === user.email);
+
+        if (!engineerInfo) {
+          const engId = `FE-${String(store.engineers.length + 1).padStart(4, '0')}`;
+          const empId = `EMP-${String(store.engineers.length + 1).padStart(4, '0')}`;
+          const nameParts = (user.name || 'Field Engineer').split(' ');
+          const firstName = nameParts[0] || 'Field';
+          const lastName = nameParts.slice(1).join(' ') || 'Engineer';
+
+          engineerInfo = {
+            _id: `eng_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+            engineerId: engId,
+            userId: user._id,
+            firstName,
+            lastName,
+            email: user.email,
+            phone: user.phone || '',
+            employeeId: empId,
+            department: 'Field Operations',
+            designation: 'Field Engineer',
+            status: 'Available',
+            joiningDate: user.createdAt || new Date()
+          };
+          store.engineers.push(engineerInfo);
+        } else if (engineerInfo.status === 'Offline') {
+          engineerInfo.status = 'Available';
+        }
       }
     }
 

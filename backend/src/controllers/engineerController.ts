@@ -1,38 +1,118 @@
 import { Response } from 'express';
+import mongoose from 'mongoose';
 import { Engineer } from '../models/Engineer';
 import { AuthRequest } from '../middleware/auth';
 import { User } from '../models/User';
 import { hashPassword } from '../utils/password';
 import { Trip } from '../models/Trip';
 import { Task } from '../models/Task';
+import { getInMemoryStore } from '../utils/inMemoryDB';
 
 export async function getEngineers(req: AuthRequest, res: Response) {
   try {
     const { status, search } = req.query;
 
-    const query: any = {};
-    if (status) {
-      query.status = status;
+    if (mongoose.connection.readyState === 1) {
+      // Auto-sync: Ensure every User with role FIELD_ENGINEER has a corresponding Engineer document
+      const feUsers = await User.find({ role: 'FIELD_ENGINEER' });
+      for (const u of feUsers) {
+        const engExists = await Engineer.findOne({ userId: u._id });
+        if (!engExists) {
+          const count = await Engineer.countDocuments();
+          const engId = `FE-${String(count + 1).padStart(4, '0')}`;
+          const empId = `EMP-${String(count + 1).padStart(4, '0')}`;
+          const nameParts = (u.name || 'Field Engineer').split(' ');
+          const firstName = nameParts[0] || 'Field';
+          const lastName = nameParts.slice(1).join(' ') || 'Engineer';
+
+          await Engineer.create({
+            engineerId: engId,
+            userId: u._id,
+            firstName,
+            lastName,
+            email: u.email,
+            phone: u.phone || '',
+            employeeId: empId,
+            department: 'Field Operations',
+            designation: 'Field Engineer',
+            status: 'Available',
+            joiningDate: (u as any).createdAt || new Date()
+          });
+        }
+      }
+
+      const query: any = {};
+      if (status) {
+        query.status = status;
+      }
+
+      if (search) {
+        const searchRegex = new RegExp(String(search), 'i');
+        query.$or = [
+          { firstName: searchRegex },
+          { lastName: searchRegex },
+          { engineerId: searchRegex },
+          { phone: searchRegex },
+          { email: searchRegex }
+        ];
+      }
+
+      const engineers = await Engineer.find(query)
+        .populate('userId', 'name email phone role avatarUrl isOnline lastActive')
+        .populate('assignedBike')
+        .populate('activeTaskId')
+        .sort({ createdAt: -1 });
+
+      return res.json({ success: true, count: engineers.length, data: engineers });
+    } else {
+      // In-Memory Store Fallback
+      const store = getInMemoryStore();
+      const feUsers = store.users.filter((u) => u.role === 'FIELD_ENGINEER');
+
+      for (const u of feUsers) {
+        const engExists = store.engineers.find((e) => e.userId === u._id || e.email === u.email);
+        if (!engExists) {
+          const engId = `FE-${String(store.engineers.length + 1).padStart(4, '0')}`;
+          const empId = `EMP-${String(store.engineers.length + 1).padStart(4, '0')}`;
+          const nameParts = (u.name || 'Field Engineer').split(' ');
+          const firstName = nameParts[0] || 'Field';
+          const lastName = nameParts.slice(1).join(' ') || 'Engineer';
+
+          store.engineers.push({
+            _id: `eng_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+            engineerId: engId,
+            userId: u._id,
+            firstName,
+            lastName,
+            email: u.email,
+            phone: u.phone || '',
+            employeeId: empId,
+            department: 'Field Operations',
+            designation: 'Field Engineer',
+            status: 'Available',
+            joiningDate: (u as any).createdAt || new Date()
+          });
+        }
+      }
+
+      let result = [...store.engineers];
+      if (status) {
+        result = result.filter((e) => e.status === status);
+      }
+
+      if (search) {
+        const s = String(search).toLowerCase();
+        result = result.filter(
+          (e) =>
+            e.firstName.toLowerCase().includes(s) ||
+            e.lastName.toLowerCase().includes(s) ||
+            e.engineerId.toLowerCase().includes(s) ||
+            e.email.toLowerCase().includes(s)
+        );
+      }
+
+      return res.json({ success: true, count: result.length, data: result });
     }
-
-    if (search) {
-      const searchRegex = new RegExp(String(search), 'i');
-      query.$or = [
-        { firstName: searchRegex },
-        { lastName: searchRegex },
-        { engineerId: searchRegex },
-        { phone: searchRegex },
-        { email: searchRegex }
-      ];
-    }
-
-    const engineers = await Engineer.find(query)
-      .populate('userId', 'name email phone role avatarUrl isOnline lastActive')
-      .populate('assignedBike')
-      .populate('activeTaskId')
-      .sort({ createdAt: -1 });
-
-    return res.json({ success: true, count: engineers.length, data: engineers });
   } catch (error: any) {
     return res.status(500).json({ success: false, message: error.message });
   }
