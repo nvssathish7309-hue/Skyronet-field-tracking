@@ -233,33 +233,41 @@ export const DesktopLayout: React.FC<{ children: React.ReactNode }> = ({ childre
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Top Header Bar */}
         <header className="h-16 bg-white border-b border-slate-200/70 px-6 flex items-center justify-between shrink-0 z-20 shadow-2xs">
-          {/* Quick Search Bar */}
-          <div className="relative w-96">
-            <Search className="w-4 h-4 text-blue-500 absolute left-3.5 top-2.5" />
-            <input
-              type="text"
-              placeholder="Search tasks, engineers, trips, bikes..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 bg-slate-50/80 border border-slate-200 rounded-full text-xs font-medium text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-all shadow-inner-2xs"
-            />
+          {/* Quick Search Bar — spinning gradient border */}
+          <div className="spin-border-wrapper w-96" style={{ borderRadius: '9999px' }}>
+            <div className="spin-border-inner" style={{ borderRadius: '9999px' }}>
+              <div className="relative">
+                <Search className="w-4 h-4 text-blue-500 absolute left-3.5 top-2.5" />
+                <input
+                  type="text"
+                  placeholder="Search tasks, engineers, trips, bikes..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 bg-white rounded-full text-xs font-medium text-slate-800 placeholder-slate-400 focus:outline-none transition-all"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Right Control Icons & User Profile */}
           <div className="flex items-center gap-4">
-            {/* Notification Bell Icon */}
-            <Link
-              to="/notifications"
-              className="relative w-9 h-9 rounded-full bg-slate-50 border border-slate-200/80 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-all shadow-2xs"
-              title="Notifications"
-            >
-              <Bell className="w-4 h-4" />
+            {/* Notification Bell Icon — spinning gradient border */}
+            <div className="spin-border-wrapper relative" style={{ borderRadius: '9999px', padding: '2px' }}>
+              <div className="spin-border-inner" style={{ borderRadius: '9999px' }}>
+                <Link
+                  to="/notifications"
+                  className="relative w-9 h-9 rounded-full bg-white flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-all"
+                  title="Notifications"
+                >
+                  <Bell className="w-4 h-4" />
+                </Link>
+              </div>
               {unreadCount > 0 && (
-                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-blue-600 text-white font-extrabold text-[9px] rounded-full flex items-center justify-center ring-2 ring-white shadow-2xs">
+                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-blue-600 text-white font-extrabold text-[9px] rounded-full flex items-center justify-center ring-2 ring-white shadow-2xs z-10">
                   {unreadCount}
                 </span>
               )}
-            </Link>
+            </div>
 
             <div className="h-6 w-px bg-slate-200" />
 
