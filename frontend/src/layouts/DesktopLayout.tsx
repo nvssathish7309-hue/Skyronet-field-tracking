@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { api } from '../services/api';
 import {
   LayoutDashboard,
   Navigation,
@@ -32,6 +33,25 @@ export const DesktopLayout: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [searchQuery, setSearchQuery] = useState('');
   const [collapsed, setCollapsed] = useState(false);
+  const [unreadCount, setUnreadCount] = useState<number>(0);
+
+  useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await api.get('/notifications');
+        if (res.data.success && Array.isArray(res.data.data)) {
+          const count = res.data.data.filter((n: any) => !n.isRead).length;
+          setUnreadCount(count);
+        }
+      } catch (err) {
+        setUnreadCount(0);
+      }
+    };
+
+    fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 15000);
+    return () => clearInterval(interval);
+  }, [location.pathname]);
 
   const mainNavItems = [
     { label: 'Dashboard', path: '/dashboard', icon: LayoutDashboard, roles: ['SUPER_ADMIN', 'ADMIN'] },
@@ -232,9 +252,11 @@ export const DesktopLayout: React.FC<{ children: React.ReactNode }> = ({ childre
               title="Notifications"
             >
               <Bell className="w-4 h-4" />
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white font-extrabold text-[9px] rounded-full flex items-center justify-center ring-2 ring-white shadow-2xs">
-                3
-              </span>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-4 h-4 px-1 bg-blue-600 text-white font-extrabold text-[9px] rounded-full flex items-center justify-center ring-2 ring-white shadow-2xs">
+                  {unreadCount}
+                </span>
+              )}
             </Link>
 
             <div className="h-6 w-px bg-slate-200" />
