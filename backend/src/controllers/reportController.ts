@@ -24,6 +24,25 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
       const approvedExpenses = store.expenses.filter(e => e.status === 'Approved').length;
       const rejectedExpenses = store.expenses.filter(e => e.status === 'Rejected').length;
 
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+      sevenDaysAgo.setHours(0, 0, 0, 0);
+
+      const weeklyTrend = [];
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(sevenDaysAgo);
+        d.setDate(d.getDate() + i);
+        const dateStr = d.toISOString().split('T')[0];
+        const dayTrips = store.trips.filter(t => t.startTime && new Date(t.startTime).toISOString().split('T')[0] === dateStr);
+        const km = dayTrips.reduce((sum, t) => sum + (t.distanceKm || 0), 0);
+        const expense = dayTrips.reduce((sum, t) => sum + (t.totalAmount || 0), 0);
+        weeklyTrend.push({
+          date: dateStr,
+          km: Math.round(km * 10) / 10,
+          expense: Math.round(expense)
+        });
+      }
+
       return res.json({
         success: true,
         data: {
@@ -40,7 +59,7 @@ export async function getDashboardStats(req: AuthRequest, res: Response) {
             approved: approvedExpenses,
             rejected: rejectedExpenses
           },
-          weeklyTrend: []
+          weeklyTrend
         }
       });
     }
