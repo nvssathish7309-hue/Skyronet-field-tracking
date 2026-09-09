@@ -405,3 +405,110 @@ export async function uploadTaskPhotos(req: AuthRequest, res: Response) {
     return res.status(500).json({ success: false, message: error.message });
   }
 }
+
+export async function updateTask(req: AuthRequest, res: Response) {
+  try {
+    const { id } = req.params;
+    const {
+      title,
+      description,
+      customerName,
+      customerPhone,
+      locationName,
+      address,
+      latitude,
+      longitude,
+      priority,
+      scheduledDate,
+      scheduledTime,
+      assignedEngineer,
+      status
+    } = req.body;
+
+    if (mongoose.connection.readyState !== 1) {
+      const store = getInMemoryStore();
+      const task = store.tasks.find((t) => t._id === id || t.taskId === id);
+      if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+
+      if (title !== undefined) task.title = title;
+      if (description !== undefined) task.description = description;
+      if (customerName !== undefined) task.customerName = customerName;
+      if (customerPhone !== undefined) task.customerPhone = customerPhone;
+      if (locationName !== undefined) task.locationName = locationName;
+      if (address !== undefined) task.address = address;
+      if (latitude !== undefined) task.latitude = Number(latitude);
+      if (longitude !== undefined) task.longitude = Number(longitude);
+      if (priority !== undefined) task.priority = priority;
+      if (scheduledDate !== undefined) task.scheduledDate = new Date(scheduledDate);
+      if (scheduledTime !== undefined) task.scheduledTime = scheduledTime;
+
+      if (assignedEngineer !== undefined) {
+        if (!assignedEngineer || assignedEngineer.trim() === '') {
+          task.assignedEngineer = undefined;
+          if (task.status === 'Assigned') task.status = 'Pending';
+        } else {
+          const eng = store.engineers.find(
+            (e) => e._id.toString() === assignedEngineer.toString() || e.engineerId === assignedEngineer
+          );
+          if (eng) {
+            task.assignedEngineer = eng;
+            if (task.status === 'Pending') task.status = 'Assigned';
+          }
+        }
+      }
+
+      if (status !== undefined) task.status = status;
+      task.updatedAt = new Date();
+
+      saveStoreToDisk();
+
+      try {
+        getIO().emit('task:status-updated', { taskId: task._id, status: task.status });
+      } catch (_) {}
+
+      return res.json({ success: true, message: 'Task updated successfully', data: task });
+    }
+
+    const task = await Task.findById(id);
+    if (!task) return res.status(404).json({ success: false, message: 'Task not found' });
+
+    if (title !== undefined) task.title = title;
+    if (description !== undefined) task.description = description;
+    if (customerName !== undefined) task.customerName = customerName;
+    if (customerPhone !== undefined) task.customerPhone = customerPhone;
+    if (locationName !== undefined) task.locationName = locationName;
+    if (address !== undefined) task.address = address;
+    if (latitude !== undefined) task.latitude = Number(latitude);
+    if (longitude !== undefined) task.longitude = Number(longitude);
+    if (priority !== undefined) task.priority = priority as TaskPriority;
+    if (scheduledDate !== undefined) task.scheduledDate = new Date(scheduledDate);
+    if (scheduledTime !== undefined) task.scheduledTime = scheduledTime;
+
+    if (assignedEngineer !== undefined) {
+      if (!assignedEngineer || assignedEngineer.trim() === '' || assignedEngineer === 'null') {
+        task.assignedEngineer = undefined;
+        if (task.status === 'Assigned') task.status = 'Pending';
+      } else if (mongoose.Types.ObjectId.isValid(assignedEngineer)) {
+        task.assignedEngineer = assignedEngineer as any;
+        if (task.status === 'Pending') task.status = 'Assigned';
+      }
+    }
+
+    if (status !== undefined) task.status = status as TaskStatus;
+
+    await task.save();
+
+    const updatedTask = await Task.findById(id)
+      .populate('assignedEngineer')
+      .populate('assignedBy', 'name email');
+
+    try {
+      getIO().emit('task:status-updated', { taskId: task._id, status: task.status });
+    } catch (_) {}
+
+    return res.json({ success: true, message: 'Task updated successfully', data: updatedTask || task });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message || 'Failed to update task' });
+  }
+}
+

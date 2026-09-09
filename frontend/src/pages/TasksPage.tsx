@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { api } from '../services/api';
 import { Task } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
-import { Plus, Search, Filter, ClipboardList, MapPin, Calendar, UserCheck, ArrowRight } from 'lucide-react';
+import { EditTaskModal } from '../components/EditTaskModal';
+import { Plus, Search, Filter, ClipboardList, MapPin, Calendar, UserCheck, ArrowRight, Edit3 } from 'lucide-react';
 
 export const TasksPage: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -11,6 +12,9 @@ export const TasksPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('');
   const [priorityFilter, setPriorityFilter] = useState('');
   const [loading, setLoading] = useState(true);
+
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     fetchTasks();
@@ -159,13 +163,26 @@ export const TasksPage: React.FC = () => {
                     <StatusBadge status={t.status} />
                   </td>
                   <td className="py-4 px-4 text-right">
-                    <Link
-                      to={`/tasks/${t._id}`}
-                      className="inline-flex items-center gap-1 text-xs font-bold text-sky-600 hover:text-sky-700"
-                    >
-                      <span>Details</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </Link>
+                    <div className="flex items-center justify-end gap-3">
+                      <button
+                        onClick={() => {
+                          setEditingTask(t);
+                          setIsEditModalOpen(true);
+                        }}
+                        className="inline-flex items-center gap-1 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors cursor-pointer bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg border border-blue-200"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                        <span>Edit</span>
+                      </button>
+
+                      <Link
+                        to={`/tasks/${t._id}`}
+                        className="inline-flex items-center gap-1 text-xs font-bold text-sky-600 hover:text-sky-700"
+                      >
+                        <span>Details</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -173,6 +190,17 @@ export const TasksPage: React.FC = () => {
           </table>
         </div>
       </div>
+
+      <EditTaskModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingTask(null);
+        }}
+        task={editingTask}
+        onTaskUpdated={() => fetchTasks()}
+      />
     </div>
   );
 };
+

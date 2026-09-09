@@ -4,6 +4,7 @@ import { api } from '../services/api';
 import { Task, Trip } from '../types';
 import { StatusBadge } from '../components/StatusBadge';
 import { LiveMap } from '../components/LiveMap';
+import { EditTaskModal } from '../components/EditTaskModal';
 import {
   ArrowLeft,
   MapPin,
@@ -15,7 +16,8 @@ import {
   IndianRupee,
   Camera,
   CheckCircle,
-  FileText
+  FileText,
+  Edit3
 } from 'lucide-react';
 
 export const TaskDetailPage: React.FC = () => {
@@ -25,6 +27,7 @@ export const TaskDetailPage: React.FC = () => {
   const [task, setTask] = useState<Task | null>(null);
   const [activeTrip, setActiveTrip] = useState<Trip | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   useEffect(() => {
     fetchTaskDetails();
@@ -63,7 +66,7 @@ export const TaskDetailPage: React.FC = () => {
       {/* Header Bar */}
       <div className="flex items-center justify-between gap-4 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-2 text-slate-400 hover:text-slate-700 bg-slate-100 rounded-xl">
+          <button onClick={() => navigate(-1)} className="p-2 text-slate-400 hover:text-slate-700 bg-slate-100 rounded-xl cursor-pointer">
             <ArrowLeft className="w-4 h-4" />
           </button>
           <div>
@@ -74,6 +77,14 @@ export const TaskDetailPage: React.FC = () => {
             <h1 className="text-lg font-black text-slate-800 mt-0.5">{task.title}</h1>
           </div>
         </div>
+
+        <button
+          onClick={() => setIsEditModalOpen(true)}
+          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-extrabold text-xs rounded-xl shadow-md shadow-blue-600/20 flex items-center gap-2 transition-all cursor-pointer"
+        >
+          <Edit3 className="w-4 h-4" />
+          <span>Edit Task</span>
+        </button>
       </div>
 
       {/* Grid: Task Info + Map Viewport */}
@@ -205,6 +216,13 @@ export const TaskDetailPage: React.FC = () => {
           )}
         </div>
       </div>
+
+      <EditTaskModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        task={task}
+        onTaskUpdated={(updated) => setTask(updated)}
+      />
     </div>
   );
 };
