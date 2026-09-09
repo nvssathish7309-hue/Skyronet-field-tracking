@@ -20,6 +20,7 @@ import { ExpensesPage } from './pages/ExpensesPage';
 import { ReportsPage } from './pages/ReportsPage';
 import { SettingsPage } from './pages/SettingsPage';
 import { NotificationsPage } from './pages/NotificationsPage';
+import { ProfilePage } from './pages/ProfilePage';
 
 import { EngineerTasksPage } from './pages/EngineerTasksPage';
 import { EngineerTaskDetailPage } from './pages/EngineerTaskDetailPage';
@@ -171,6 +172,14 @@ export const AppContent: React.FC = () => {
         element={
           <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS']}>
             <NotificationsPage />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute roles={['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS', 'FIELD_ENGINEER']}>
+            <ProfilePage />
           </ProtectedRoute>
         }
       />

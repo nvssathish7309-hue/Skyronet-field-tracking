@@ -251,6 +251,18 @@ export const MobileLayout: React.FC<{ children: React.ReactNode }> = ({ children
               <Receipt className="w-5 h-5" />
               <span>Expenses</span>
             </NavLink>
+
+            <NavLink
+              to="/profile"
+              className={({ isActive }) =>
+                `flex flex-col items-center gap-1 text-[10px] font-bold transition-all ${
+                  isActive ? 'text-blue-600' : 'text-slate-400 hover:text-slate-600'
+                }`
+              }
+            >
+              <User className="w-5 h-5" />
+              <span>Profile</span>
+            </NavLink>
           </>
         )}
       </nav>

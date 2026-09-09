@@ -19,7 +19,8 @@ import {
   ChevronLeft,
   Moon,
   Sun,
-  ShieldCheck
+  ShieldCheck,
+  UserCheck
 } from 'lucide-react';
 
 import { BrandLogo } from '../components/BrandLogo';
@@ -65,6 +66,7 @@ export const DesktopLayout: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const systemNavItems = [
     { label: 'Reports & Analytics', path: '/reports', icon: BarChart3, roles: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'] },
+    { label: 'My Account Profile', path: '/profile', icon: UserCheck, roles: ['SUPER_ADMIN', 'ADMIN', 'ACCOUNTS'] },
     { label: 'System Settings', path: '/settings', icon: SettingsIcon, roles: ['SUPER_ADMIN', 'ADMIN'] }
   ];
 
@@ -262,19 +264,19 @@ export const DesktopLayout: React.FC<{ children: React.ReactNode }> = ({ childre
             <div className="h-6 w-px bg-slate-200" />
 
             {/* User Avatar Chip */}
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-full bg-blue-600 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/20 ring-2 ring-blue-100">
+            <Link to="/profile" className="flex items-center gap-3 group p-1 rounded-xl hover:bg-slate-50 transition-all cursor-pointer" title="Edit My Profile">
+              <div className="w-9 h-9 rounded-full bg-blue-600 group-hover:bg-blue-700 text-white font-black text-xs flex items-center justify-center shadow-md shadow-blue-500/20 ring-2 ring-blue-100 transition-all">
                 {userInitials}
               </div>
               <div className="text-left hidden sm:block">
-                <div className="font-black text-xs text-slate-900 tracking-tight">{user?.name || 'Super Admin'}</div>
+                <div className="font-black text-xs text-slate-900 group-hover:text-blue-600 tracking-tight transition-all">{user?.name || 'Super Admin'}</div>
                 <div className="mt-0.5">
                   <span className="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-100 text-[9px] font-black uppercase tracking-wider">
                     {user?.role ? user.role.replace('_', ' ') : 'SUPER ADMIN'}
                   </span>
                 </div>
               </div>
-            </div>
+            </Link>
 
             {/* Quick Logout Button */}
             <button

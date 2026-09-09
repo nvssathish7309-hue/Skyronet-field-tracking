@@ -312,3 +312,91 @@ export async function registerEngineer(req: Request, res: Response) {
   }
 }
 
+export async function updateProfile(req: AuthRequest, res: Response) {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Not authenticated' });
+    }
+
+    const { name, phone, email, currentPassword, newPassword } = req.body;
+
+    let user: any = null;
+
+    if (mongoose.connection.readyState === 1) {
+      user = await User.findById(req.user.userId);
+    } else {
+      const store = getInMemoryStore();
+      user = store.users.find((u) => u._id.toString() === req.user!.userId);
+    }
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User account not found' });
+    }
+
+    // Password change check
+    if (newPassword) {
+      if (!currentPassword) {
+        return res.status(400).json({ success: false, message: 'Please provide current password to set a new password' });
+      }
+      const isMatch = await comparePassword(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ success: false, message: 'Current password does not match' });
+      }
+      user.password = await hashPassword(newPassword);
+    }
+
+    if (name) user.name = name.trim();
+    if (phone) user.phone = phone.trim();
+    if (email) user.email = email.toLowerCase().trim();
+
+    if (mongoose.connection.readyState === 1) {
+      await user.save();
+    }
+
+    // Sync engineer info if field engineer
+    let engineerInfo = null;
+    if (user.role === 'FIELD_ENGINEER') {
+      const nameParts = (user.name || '').split(' ');
+      const firstName = nameParts[0] || 'Field';
+      const lastName = nameParts.slice(1).join(' ') || 'Engineer';
+
+      if (mongoose.connection.readyState === 1) {
+        engineerInfo = await Engineer.findOneAndUpdate(
+          { userId: user._id },
+          { firstName, lastName, phone: user.phone, email: user.email },
+          { new: true }
+        );
+      } else {
+        const store = getInMemoryStore();
+        const eng = store.engineers.find((e) => e.userId === user._id || e.email === user.email);
+        if (eng) {
+          eng.firstName = firstName;
+          eng.lastName = lastName;
+          eng.phone = user.phone;
+          eng.email = user.email;
+          engineerInfo = eng;
+        }
+      }
+    }
+
+    return res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      data: {
+        user: {
+          id: user._id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+          phone: user.phone,
+          avatarUrl: user.avatarUrl,
+          engineer: engineerInfo
+        }
+      }
+    });
+  } catch (error: any) {
+    console.error('Update profile error:', error);
+    return res.status(500).json({ success: false, message: error.message || 'Failed to update profile' });
+  }
+}
+
